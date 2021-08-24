@@ -1,0 +1,49 @@
+   static ListNode thead=null;
+    static ListNode ttail=null;
+    
+    public static void addFirst(ListNode node){
+        if(thead == null){
+            thead = ttail = node;
+        }else{
+            node.next = thead;
+            thead = node;
+        }
+    }
+    
+    public static int getLength(ListNode head){
+        int len = 0;
+        ListNode curr = head;
+        while(curr != null){
+            len++;
+            curr = curr.next;
+        }
+        return len;
+    }
+
+    public static ListNode reverseInKGroup(ListNode head, int k) {
+        if(head == null || head.next == null || k<=0){
+            return head;
+        }
+        int length = getLength(head);
+        ListNode cur = head;
+        ListNode oh = null; ListNode ot = null;
+        while(length>=k){
+            int x = k;
+            while(x>0){
+                ListNode forw = cur.next;
+                addFirst(cur);
+                cur = forw;
+                x--;
+            }
+            if(oh == null){
+                oh = thead;
+                ot = ttail;
+            }else{
+                ot.next = thead;
+                ot = ttail;
+            }
+            thead = null; ttail = null; length-=k;
+        }
+        ot.next = cur;
+        return oh;
+    }
