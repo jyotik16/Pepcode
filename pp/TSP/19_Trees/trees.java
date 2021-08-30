@@ -495,7 +495,6 @@ public class trees {
         return rh - lh + 1;
     }
 
-
     // vertical order traversal - I
     // https://practice.geeksforgeeks.org/problems/print-a-binary-tree-in-vertical-order/1
     static class Pair implements Comparable<Pair>{
@@ -726,7 +725,6 @@ public class trees {
         return res;
     }
 
-
     // diagonal order sum
     public static ArrayList<Integer> diagonalOrderSum(TreeNode root) {
         Queue<TreeNode> qu = new LinkedList<>();
@@ -805,6 +803,740 @@ public class trees {
         return res;
     }
 
+    // leetcode 173 https://leetcode.com/problems/binary-search-tree-iterator/
+    class BSTIterator {
+
+        class Pair {
+            TreeNode node;
+            int state;
+            
+            public Pair(TreeNode node, int state) {
+                this.node = node;
+                this.state = state;
+            }
+        }
+        
+        private int itr_val = -1;
+        
+        private Stack<Pair> st;
+        
+        public BSTIterator(TreeNode root) {
+            st = new Stack<>();
+            st.push(new Pair(root, 0));
+            next();
+        }
+        
+        public int next() {
+            int val2 = itr_val;
+            itr_val = -1;
+            while(st.size() > 0) {
+                Pair top = st.peek();
+                if(top.state == 0) {
+                    if(top.node.left != null) {
+                        st.push(new Pair(top.node.left, 0));
+                    }
+                    top.state++;
+                } else if(top.state == 1) {
+                    if(top.node.right != null) {
+                        st.push(new Pair(top.node.right, 0));
+                    }
+                    top.state++;
+                    itr_val = top.node.val;
+                    break;
+                } else {
+                    st.pop();
+                }
+            }
+            return val2;
+        }
+        
+        public boolean hasNext() {
+            if(itr_val == -1) return false;
+            else return true;
+        }
+    }
+
+    // method 2
+    class BSTIterator2 {
+        private Stack<TreeNode> st;
+
+        private void addAllLeft(TreeNode node) {
+            while(node != null) {
+                st.push(node);
+                node = node.left;
+            }
+        }
+
+        public BSTIterator2(TreeNode root) {
+            st = new Stack<>();
+            addAllLeft(root);
+        }
+        
+        public int next() {
+            TreeNode rem = st.pop();
+            if(rem.right != null) {
+                addAllLeft(rem.right);
+            }
+            return rem.val;
+        }
+        
+        public boolean hasNext() {
+            return st.size() != 0;
+        }
+    }
+
+    // root to all leaf
+    private static void rootToAllLeafPath(TreeNode node, ArrayList<Integer> subres, 
+    ArrayList<ArrayList<Integer>> res) {
+        if(node == null) return;
+
+        if(node.left == null && node.right == null) {
+            // leaf
+            ArrayList<Integer> duplicate = new ArrayList<>();
+            for(int val : subres) {
+                duplicate.add(val);
+            }
+            duplicate.add(node.val);
+            res.add(duplicate);
+            return;
+        }
+
+        subres.add(node.val);
+        rootToAllLeafPath(node.left, subres, res);
+        rootToAllLeafPath(node.right, subres, res);
+        subres.remove(subres.size() - 1);
+    }
+
+    public static ArrayList<ArrayList<Integer>> rootToAllLeafPath(TreeNode root) {
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+        ArrayList<Integer> subres = new ArrayList<>();
+        rootToAllLeafPath(root, subres, res);
+        return res;
+    }
+
+    // single child parent
+    private static void exactlyOneChild(TreeNode root, ArrayList<Integer> ans) {
+        if(root == null || (root.left == null && root.right == null)) {
+            // is root null and leaf -> skip
+            return;
+        }
+
+        if(root.left == null || root.right == null) {
+            ans.add(root.val);
+        }
+
+        exactlyOneChild(root.left, ans);
+        exactlyOneChild(root.right, ans);
+    }
+
+    public static ArrayList<Integer> exactlyOneChild(TreeNode root) {
+        ArrayList<Integer> ans = new ArrayList<>();
+        exactlyOneChild(root, ans);
+        return ans;
+    }
+
+    // count of single child parent
+    static int count = 0;
+
+    public static void countExactlyOneChild_(TreeNode root) {
+        if(root == null || (root.left == null && root.right == null)) {
+            // is root null and leaf -> skip
+            return;
+        }
+
+        if(root.left == null || root.right == null) {
+            count++;
+        }
+        countExactlyOneChild_(root.left);
+        countExactlyOneChild_(root.right);
+    }
+
+    public static int countExactlyOneChild1(TreeNode node) {
+        count = 0;
+        countExactlyOneChild_(node);
+        return count;
+    }
+
+    // method 2 -> with int return type i.e. without static variable;
+    public static int countExactlyOneChild(TreeNode root) {
+        if(root == null || (root.left == null && root.right == null)) {
+            // is root null and leaf -> skip
+            return 0;
+        }
+
+        int ans = 0;
+        if(root.left == null || root.right == null) {
+            ans = 1;
+        }
+        ans += countExactlyOneChild(root.left);
+        ans += countExactlyOneChild(root.right);
+        return ans;
+    }
+
+    // morris inorder traversal
+    public static TreeNode getRightMostNode(TreeNode temp, TreeNode curr) {
+        while(temp.right != null && temp.right != curr) {
+            temp = temp.right;
+        }
+        return temp;
+    }
+
+    public static ArrayList<Integer> morrisInTraversal(TreeNode node) {
+        ArrayList<Integer> ans = new ArrayList<>();
+        TreeNode curr = node;
+        while(curr != null) {
+            TreeNode leftNode = curr.left;
+            if(leftNode != null) {
+                TreeNode rightMostNode = getRightMostNode(leftNode, curr);
+                if(rightMostNode.right != curr) {
+                    // create a thread and move toward left tree
+                    rightMostNode.right = curr; // thread creation
+                    curr = curr.left;
+                } else {
+                    // if rightmostnode.right == curr that means left subtree is completely processed
+                    // 1. print the value
+                    ans.add(curr.val);
+                    // 2. break thread
+                    rightMostNode.right = null;
+                    // 3. move toward right
+                    curr = curr.right;
+                }
+            } else {
+                // 1. print value
+                ans.add(curr.val);
+                // 2. move toward right
+                curr = curr.right;
+            }
+        }
+        return ans;
+    }
+
+    // morris preorder traversal
+    public static ArrayList<Integer> morrisPreTraversal(TreeNode node) {
+        ArrayList<Integer> res = new ArrayList<>();
+        TreeNode curr = node;
+
+        while(curr != null) {
+            TreeNode leftNode = curr.left;
+            if(leftNode != null) {
+                TreeNode rightMostNode = getRightMostNode(leftNode, curr);
+                if(rightMostNode.right != curr) {
+                    res.add(curr.val);
+                    rightMostNode.right = curr;
+                    curr = curr.left;
+                } else {
+                    rightMostNode.right = null;
+                    curr = curr.right;
+                }
+            } else {
+                res.add(curr.val);
+                curr = curr.right;
+            }
+        }
+        return res;
+    }
+
+    // morris post order
+    public static TreeNode getLeftMostNode(TreeNode temp, TreeNode curr) {
+        while(temp.left != null && temp.left != curr) {
+            temp = temp.left;
+        }
+        return temp;
+    }
+
+    public static ArrayList<Integer> morrisPostTraversal(TreeNode node) {
+        ArrayList<Integer> res = new ArrayList<>();
+        TreeNode curr = node;
+
+        while(curr != null) {
+            TreeNode rightNode = curr.right;
+            if(rightNode != null) {
+                TreeNode leftMostNode = getLeftMostNode(rightNode, curr);
+                if(leftMostNode.left != curr) {
+                    res.add(curr.val);
+                    leftMostNode.left = curr;
+                    curr = curr.right;
+                } else {
+                    leftMostNode.left = null;
+                    curr = curr.left;
+                }
+            } else {
+                res.add(curr.val);
+                curr = curr.left;
+            }
+        }
+        // reverse of res
+        int left = 0;
+        int right = res.size() - 1;
+
+        while(left < right) {
+            int val1 = res.get(left);
+            int val2 = res.get(right);
+            res.set(right, val1);
+            res.set(left, val2);
+        }
+        return res;
+    }
+
+    // bst iterator using morris traversal
+    class BSTIterator_3 {
+        private TreeNode res = null;
+        private TreeNode curr = null;
+        public TreeNode getRightMostNode(TreeNode temp, TreeNode curr) {
+            while(temp.right != null && temp.right != curr) {
+                temp = temp.right;
+            }
+            return temp;
+        }
+        
+        public void morrisInTraversal(TreeNode node) {
+            this.curr = node;
+            while(curr != null) {
+                TreeNode leftNode = curr.left;
+                if(leftNode != null) {
+                    TreeNode rightMostNode = getRightMostNode(leftNode, curr);
+                    if(rightMostNode.right != curr) {
+                        rightMostNode.right = curr;
+                        curr = curr.left;
+                    } else {
+                        this.res = curr;
+                        rightMostNode.right = null;
+                        curr = curr.right;
+                        break;
+                    }
+                } else {
+                    this.res = curr;
+                    curr = curr.right;
+                    break;
+                }
+            }
+        }
+        
+        public BSTIterator_3(TreeNode root) {
+            this.curr = root;
+        }
+        
+        public int next() {
+            morrisInTraversal(this.curr);
+            int val = res.val;
+            return val;
+        }
+        
+        public boolean hasNext() {
+            return this.curr != null;
+        }
+    }
+
+    // leetcode 113, https://leetcode.com/problems/path-sum-ii/
+    private void pathSum(TreeNode root, int targetSum, int ssf, List<Integer> psf, List<List<Integer>> res) {
+        if(root == null) return;
+
+        if(root.left == null && root.right == null) {
+            if(ssf + root.val == targetSum) {
+                // create a duplicate
+                List<Integer> duplicate = new ArrayList<>();
+                for(int val : psf)
+                    duplicate.add(val);
+                // insert root.val in duplicate
+                duplicate.add(root.val);
+                // add duplicate in res
+                res.add(duplicate);
+            }
+            return;
+        }
+
+        psf.add(root.val);
+        pathSum(root.left, targetSum, ssf + root.val, psf, res);
+        pathSum(root.right, targetSum, ssf + root.val, psf, res);
+        psf.remove(psf.size() - 1);
+    }
+
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+        List<List<Integer>> res = new ArrayList<>();
+        List<Integer> subres = new ArrayList<>();
+        pathSum(root, targetSum, 0, subres, res);
+        return res;
+    }
+
+    // diameter of binary tree
+    // leetcode 543 https://leetcode.com/problems/diameter-of-binary-tree/
+    // method 1 -> with height call
+    private int height(TreeNode node) {
+        if(node == null) return -1;
+
+        int lh = height(node.left);
+        int rh = height(node.right);
+
+        return Math.max(lh, rh) + 1;
+    } 
+
+    private int diameter1(TreeNode node) {
+        if(node == null) return 0;
+
+        int ld = diameter1(node.left);
+        int rd = diameter1(node.right);
+
+        int lh = height(node.left);
+        int rh = height(node.right);
+        int rootDia = lh + rh + 2;
+        
+        // return max of all three possibility
+        return Math.max(rootDia, Math.max(ld, rd));
+    }
+
+    // method 2 -> with return height amd static diameter variable, travel and change stretagy
+    static int diameter = 0;
+    private int diamater2(TreeNode node) {
+        if(node == null) return -1;
+
+        int lh = diamater2(node.left);
+        int rh = diamater2(node.right);
+
+        diameter = Math.max(diameter, lh + rh + 2);
+
+        return Math.max(lh, rh) + 1;
+    } 
+
+    // method 3 -> with wrapper class having diameter and height
+    private class DiaPair {
+        int height;
+        int diamter;
+
+        DiaPair(int height, int diameter) {
+            this.height = height;
+            this.diamter = diameter;
+        }
+
+        DiaPair() {
+            this.height = -1;
+            this.diamter = 0;
+        }
+    }
+
+    private DiaPair diameter3(TreeNode node) {
+        if(node == null) return new DiaPair();
+
+        DiaPair lpair = diameter3(node.left);
+        DiaPair rpair = diameter3(node.right);
+
+        DiaPair mpair = new DiaPair();
+        mpair.height = Math.max(lpair.height, rpair.height) + 1;
+        mpair.diamter = Math.max(lpair.height + rpair.height + 2, 
+                        Math.max(lpair.diamter, rpair.diamter));
+
+        return mpair;
+    }
+
+    public int diameterOfBinaryTree(TreeNode root) {
+        // int dia = diameter1(root);
+
+        diameter = 0;
+        diamater2(root);
+        int dia = diameter;
+
+        // int dia = diameter3(root).diamter;
+        return dia;
+    }
+
+
+    // max path sum between two leaf https://practice.geeksforgeeks.org/problems/maximum-path-sum/1#
+    static int maxPathSum = Integer.MIN_VALUE;
+
+    private int maxPathSum1(Node node) {
+        int sum = 0;
+        if(node.left != null && node.right != null) {
+            int lsum = maxPathSum1(node.left);
+            int rsum = maxPathSum1(node.right);
+            maxPathSum = Math.max(maxPathSum, lsum + rsum + node.data);
+            sum = Math.max(lsum, rsum) + node.data;
+        } else if(node.left != null) {
+            int lsum = maxPathSum1(node.left);
+            sum = lsum + node.data;
+        } else if(node.right != null) {
+            int rsum = maxPathSum1(node.right);
+            sum = rsum + node.data;
+        } else {
+            sum = node.data;            
+        }
+        return sum;
+    }
+
+    int maxPathSum(Node node) { 
+        if(node == null) return 0;
+        maxPathSum = Integer.MIN_VALUE;
+        if(node.left != null && node.right != null) {
+            int lsum = maxPathSum1(node.left);
+            int rsum = maxPathSum1(node.right);
+            maxPathSum = Math.max(maxPathSum, lsum + rsum + node.data);
+        } else if(node.left != null) {
+            int lsum = maxPathSum1(node.left);
+            maxPathSum = Math.max(maxPathSum, lsum + node.data);
+        } else if(node.right != null) {
+            int rsum = maxPathSum1(node.right);
+            maxPathSum = Math.max(maxPathSum, rsum + node.data);
+        } else {
+            // maxPathSum = node.data;
+        }
+        return maxPathSum;
+    } 
+
+    // all nodes in k distance 
+    private static ArrayList<TreeNode> nodeToRootPathNodeType(TreeNode node, int data) {
+        ArrayList<TreeNode> mres = new ArrayList<>();
+        if(node == null) return mres;
+
+        if(node.val == data) {
+            mres.add(node);
+            return mres;
+        }
+
+        ArrayList<TreeNode> lres = nodeToRootPathNodeType(node.left, data);
+        if(lres.size() > 0) {
+            lres.add(node);
+            return lres;
+        }
+        ArrayList<TreeNode> rres = nodeToRootPathNodeType(node.right, data);
+        if(rres.size() > 0) {
+            rres.add(node);
+            return rres;
+        }
+        return mres;
+    }
+
+    private static void kdown(TreeNode node, TreeNode blockage, int k, ArrayList<Integer> res) {
+        if(node == null || node == blockage) return;
+
+        if(k == 0) {
+            res.add(node.val);
+            return;
+        }
+
+        kdown(node.left, blockage, k - 1, res);
+        kdown(node.right, blockage, k - 1, res);
+    }
+
+    public static ArrayList<Integer> distanceK(TreeNode root, int target, int k) {
+        ArrayList<TreeNode> n2rpath = nodeToRootPathNodeType(root, target);
+
+        ArrayList<Integer> res = new ArrayList<>();
+        TreeNode blockage = null;
+        for(int i = 0; i < n2rpath.size() && k - i >= 0; i++) {
+            TreeNode node = n2rpath.get(i);
+            kdown(node, blockage, k - i, res);
+            blockage = node;
+        }
+        return res;
+    }
+
+    // burning tree
+    static int maxTime = 0;
+    private static void burningTree_(TreeNode node, TreeNode blockage, int time) {
+        if(node == null || node == blockage) return;
+
+        maxTime = Math.max(maxTime, time);
+
+        burningTree_(node.left, blockage, time + 1);
+        burningTree_(node.right, blockage, time + 1);
+    }
+
+    public static int burning_Tree(TreeNode root, int fireNode) {
+        ArrayList<TreeNode> n2rpath = nodeToRootPathNodeType(root, fireNode);
+        maxTime = 0;
+        TreeNode blockage = null;
+        for(int t = 0; t < n2rpath.size(); t++) {
+            TreeNode node = n2rpath.get(t);
+            burningTree_(node, blockage, t);
+            blockage = node;
+        }
+        return maxTime;
+    }
+
+    // burning tree 2
+    private static void burningTree_1(TreeNode node, TreeNode blockage, 
+                            int time, ArrayList<ArrayList<Integer>> res) {
+        if(node == null || node == blockage) return;
+
+        if(time < res.size()) {
+            res.get(time).add(node.val);
+        } else {
+            // time == res.size()
+            ArrayList<Integer> subres = new ArrayList<>();
+            subres.add(node.val);
+            res.add(subres);
+        }
+
+        burningTree_1(node.left, blockage, time + 1, res);
+        burningTree_1(node.right, blockage, time + 1, res);
+    }
+    public static ArrayList<ArrayList<Integer>> burningTree(TreeNode root, int data) {
+        ArrayList<TreeNode> n2rpath = nodeToRootPathNodeType(root, data);
+        TreeNode blockage = null;
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+ 
+        for(int t = 0; t < n2rpath.size(); t++) {
+            TreeNode node = n2rpath.get(t);
+            burningTree_1(node, blockage, t, res);
+            blockage = node;
+        }
+        return res;
+    }
+
+    // leetcode 662. https://leetcode.com/problems/maximum-width-of-binary-tree/
+    private class WPair {
+        TreeNode node;
+        int indx;
+
+        public WPair(TreeNode node, int indx) {
+            this.node = node;
+            this.indx = indx;
+        }
+    }
+
+    public int widthOfBinaryTree(TreeNode root) {
+        Queue<WPair> qu = new LinkedList<>();
+        qu.add(new WPair(root, 0));
+        int maxWidth = 0;
+        while(qu.size() > 0) {
+            int size = qu.size();
+            int lm = qu.peek().indx; // left most index
+            int rm = qu.peek().indx; // right most index
+            while(size-- > 0) {
+                // 1. get + remove
+                WPair rem = qu.remove();
+                // 2. work  
+                rm = rem.indx;
+                // 3. add children with index
+                if(rem.node.left != null) {
+                    qu.add(new WPair(rem.node.left, 2 * rem.indx + 1));
+                }
+                if(rem.node.right != null) {
+                    qu.add(new WPair(rem.node.right, 2 * rem.indx + 2));
+                }
+            }
+            // width of current level
+            int width = rm - lm + 1;
+            // maximise overall width
+            maxWidth = Math.max(maxWidth, width);
+        }
+        return maxWidth;
+    }
+
+    // convert binary serach tree sorted doubly linked list
+    static Node prev = null;
+    
+    private static void bToDLL_(Node node) {
+        if(node == null) return;
+        
+        bToDLL_(node.left);
+        // in area
+        prev.right = node;
+        node.left = prev;
+        prev = node;
+        bToDLL_(node.right);
+    }
+
+    public static Node bToDLL(Node root) {
+        Node dummy = new Node(-1);
+        prev = dummy;
+        bToDLL_(root);
+        
+        Node head = dummy.right;
+        head.left = prev;
+        prev.right = head;
+        
+        return head;
+    }
+
+    // convert sorted DLL to BST
+    private static Node getMid1(Node head) {
+        Node slow = head;
+        Node fast = head.right;
+
+        while(fast != null && fast.right != null) {
+            slow = slow.right;
+            fast = fast.right.right;
+        }
+        return slow;
+    }
+
+    private static Node creationBST(Node head) {
+        if(head == null) return null;
+        Node mid = getMid1(head);
+        if(mid.left != null) {
+            mid.left.right = null;
+            mid.left = null;
+        }
+        Node head2 = mid.right;
+        if(mid.right != null) {
+            mid.right.left = null;
+            mid.right = null;
+        }
+        if(mid != head) 
+            mid.left = creationBST(head);
+        mid.right = creationBST(head2);
+        return mid;
+    }
+
+    public static Node SortedDLLToBST(Node head) {
+        Node root = creationBST(head);
+        return root;
+    }
+
+    // leetcode 112 https://leetcode.com/problems/path-sum/
+    private boolean hasPathSum_(TreeNode node, int target, int ssf) {
+        if(node == null) return false;
+        if(node.left == null && node.right == null) {
+            return ssf + node.val == target;
+        }
+        return hasPathSum_(node.left, target, ssf + node.val) || hasPathSum_(node.right, target, ssf + node.val);
+    }
+
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        return hasPathSum_(root, targetSum, 0);
+    }
+
+    // LCA without node to root path
+    static TreeNode lca = null;
+
+    private static boolean solveLCA(TreeNode node, int data1, int data2) {
+        if(node == null) return false;
+        boolean self = node.val == data1 || node.val == data2;
+        boolean left = false, right = false;
+        left = solveLCA(node.left, data1, data2);
+        if(lca == null)
+            right = solveLCA(node.right, data1, data2);
+        if((self && left) || (self && right) || (left && right)) {
+            lca = node;
+        }
+        return self || left || right;
+    }
+
+    public static TreeNode lowestCommonAncestor(TreeNode node, int p, int q) {
+        lca = null;
+        solveLCA(node, p, q);
+        return lca;
+    }
+
+    // leetcode 124 https://leetcode.com/problems/binary-tree-maximum-path-sum/
+    static int maxPath = 0;
+    
+    private int maxPathSum_(TreeNode root) {
+        if(root == null) return (int)-1e9;
+
+        int lsum = maxPathSum_(root.left);
+        int rsum = maxPathSum_(root.right);
+
+        int val = Math.max(root.val, Math.max(lsum + root.val, rsum + root.val));
+        maxPath = Math.max(maxPath, Math.max(val, lsum + root.val + rsum));
+
+        return val;
+    }
+
+    public int maxPathSum(TreeNode root) {
+        maxPath = Integer.MIN_VALUE;   
+        maxPathSum_(root);
+        return maxPath;
+    }
     public static void main(String[] args) {
         // trees level 2    
     }
