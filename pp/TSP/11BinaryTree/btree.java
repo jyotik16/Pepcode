@@ -391,6 +391,20 @@ public class btree {
             }
         }
     }
+    
+    public static void pathToLeafFromRoot(Node node, String path, int sum, int lo, int hi){
+	    if(node == null) return;
+	    
+	    if(node.left == null && node.right == null) {
+	    	path +=" "+ node.data;
+	    	if(node.data + sum>= lo && node.data + sum<=hi) {
+	    		System.out.println(path+" @ "+(sum+node.data));
+	    	}
+	    }
+		
+		pathToLeafFromRoot(node.left, path+" "+node.data, sum+node.data, lo, hi);
+		pathToLeafFromRoot(node.right, path+" "+node.data, sum+node.data, lo, hi);
+	}
 
     public static Node createLeftCloneTree(Node node){
         if(node == null) return null;
@@ -459,6 +473,21 @@ public class btree {
         node.right = removeLeaves1(node.right);
         return node;
     }
+    
+    public static void removeLeaves(Node node,Node parent){
+	    // write your code here
+		if(node == null) return;
+		if(node.left == null && node.right == null) {
+			if(parent.left == node) {
+				parent.left = null;
+			}
+			if(parent.right == node) {
+				parent.right = null;
+			}
+		}
+		removeLeaves(node.left, node);
+		removeLeaves(node.right, node);		 
+	  }
 
     static int tilt = 0;
 
