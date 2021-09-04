@@ -279,7 +279,45 @@ public class bst {
             }
         }
     }
+    
+  public static Node remove(Node node, int data) {
+        if(node == null) 
+		return null;		    	 
 
+	    if(node.data < data) {
+	    	node.right=remove(node.right,data);
+	    }
+	    else if(node.data >data) {
+	    	node.left=remove(node.left,data);
+	    }
+	    
+	    if(node.data == data) {				    	
+	    	if(node.left == null && node.right == null) {
+	    		return null;
+	    	}else if (node.left !=null && node.right == null) {
+	    		return node.left;
+	    	}else if (node.left ==null && node.right != null) {
+	    		return node.right;
+	    	}else {
+	    		Node maxNode = getMaxNodeInLeft(node.left);
+	    		node.data = maxNode.data;
+	    		node.left = remove(node.left, maxNode.data);
+	    	}
+	    }
+		    return node;
+		
+  }
+  
+  private static Node getMaxNodeInLeft(Node node) {
+	if(node == null) {
+		return null;
+	}
+	Node current = node;
+    while (current.right != null)
+        current = current.right;
+     
+    return (current);						
+}
 
     public static void fun() {
         int[] data = { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
