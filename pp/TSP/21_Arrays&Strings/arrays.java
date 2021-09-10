@@ -345,6 +345,356 @@ public class arrays {
         return res;
     }
 
+    // wiggle sort 1
+    private static void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    public static void wiggleSort(int[] arr) {
+        for(int i = 0; i < arr.length - 1; i++) {
+            if(i % 2 == 0) {
+                // even index
+                if(arr[i] > arr[i + 1]) {
+                    swap(arr, i, i + 1);
+                }
+            } else {
+                // odd index
+                if(arr[i] < arr[i + 1]) {
+                    swap(arr, i, i + 1);
+                }
+            }
+        } 
+    }
+
+    // leetcode 324. https://leetcode.com/problems/wiggle-sort-ii/
+    public void wiggleSort2(int[] nums) {
+        int n = nums.length;
+        int[] arr = new int[n]; // dupliicate array
+
+        for(int i = 0; i < n; i++)
+            arr[i] = nums[i];
+
+        Arrays.sort(arr);
+
+        int j = n - 1;
+        int i = 1;
+
+        // fill odd index
+        while(i < n) {
+            nums[i] = arr[j];
+            j--;
+            i += 2;
+        }
+
+        // fill even index
+        i = 0;
+        while(i < n) {
+            nums[i] = arr[j];
+            j--;
+            i += 2;
+        }
+    }
+    
+    // leetcode 795 https://leetcode.com/problems/number-of-subarrays-with-bounded-maximum/
+    public int numSubarrayBoundedMax(int[] nums, int left, int right) {
+        int prev_count = 0;
+        int overall_count = 0;
+
+        int i = 0;
+        int j = 0;
+
+        while(j < nums.length) {
+            if(left <= nums[j] && nums[j] <= right) {
+                prev_count = j - i + 1;
+                overall_count += prev_count;
+            } else if(nums[j] < left) {
+                overall_count += prev_count;
+            } else {
+                prev_count = 0;
+                i = j + 1;
+            }
+            j++;
+        }
+        return overall_count;
+    }
+
+    // leetcode 849 https://leetcode.com/problems/maximize-distance-to-closest-person/
+    public int maxDistToClosest(int[] seats) {
+        int dist = 0;
+        int zeros = 0;
+        int indx = 0;
+        // left sub part
+        while(seats[indx] != 1) {
+            indx++;
+            zeros++;
+        }
+        indx++;
+        dist = zeros;
+        zeros = 0;
+        // segements calculations
+        while(indx < seats.length) {
+            while(indx < seats.length && seats[indx] != 1) {
+                zeros++;
+                indx++;
+            }
+            if(indx == seats.length)
+                break;
+
+            indx++;
+            dist = Math.max(dist, (zeros + 1) / 2);
+            zeros = 0;
+        }
+
+        // right sub part
+        return Math.max(zeros, dist);
+    }
+
+    // leetcode 41. https://leetcode.com/problems/first-missing-positive/
+    public int firstMissingPositive(int[] nums) {
+        int n = nums.length;
+        // step 1. find occurence of one and mark out of range element
+        boolean one = false;
+        for(int i = 0; i < n; i++) {
+            if(nums[i] == 1) one = true;
+
+            if(nums[i] < 1 || n < nums[i]) {
+                nums[i] = 1;
+            }
+        }
+        if(one == false) return 1;
+        // step 2. mark element in array
+        for(int i = 0; i < n; i++) {
+            int val = Math.abs(nums[i]);
+            int indx = val - 1;
+            nums[indx] = -Math.abs(nums[indx]);
+        }
+
+        // step 3. check first missing positive
+        for(int i = 0; i < n; i++) {
+            if(nums[i] > 0) {
+                return i + 1;
+            }
+        }
+        return n + 1;
+    }
+
+    // leetcode 905. https://leetcode.com/problems/sort-array-by-parity/
+    public int[] sortArrayByParity(int[] nums) {
+        int i = 0; // first unsolved
+        int j = 0; // first odd
+
+        while(i < nums.length) {
+            if(nums[i] % 2 == 0) {
+                // even
+                int temp = nums[i];
+                nums[i] = nums[j];
+                nums[j] = temp;
+
+                i++;
+                j++;
+            } else {
+                // odd
+                i++;
+            }
+        }
+        return nums;
+    }
+
+    // lintcode 903. https://www.lintcode.com/problem/903/
+    public int[] getModifiedArray(int length, int[][] updates) {
+        int[] res = new int[length];
+
+        // make impact of query on res
+        for(int i = 0; i < updates.length; i++) {
+            int st = updates[i][0];
+            int end = updates[i][1];
+            int inc = updates[i][2];
+
+            res[st] += inc;
+
+            if(end + 1 < length) {
+                res[end + 1] -= inc;
+            }
+        }
+
+        // apply impact on res using prefix sum
+        int sum = 0;
+        for(int i = 0; i < length; i++) {
+            sum += res[i];
+            res[i] = sum;
+        }
+        return res;
+    }
+
+    // lintcode 912 https://www.lintcode.com/problem/912/
+    public int minTotalDistance(int[][] grid) {
+        ArrayList<Integer> xcord = new ArrayList<>();
+        // fill xcordinate in sorted manner -> row wise traversal
+        for(int r = 0; r < grid.length; r++) {
+            for(int c = 0; c < grid[0].length; c++) {
+                if(grid[r][c] == 1)
+                    xcord.add(r);
+            }
+        }
+        ArrayList<Integer> ycord = new ArrayList<>();
+        // fill ycordinate in sorted manner -> column wise traversal
+        for(int c = 0; c < grid[0].length; c++) {
+            for(int r = 0; r < grid.length; r++) {
+                if(grid[r][c] == 1)
+                    ycord.add(c);
+            }
+        }
+        // find meeting point
+        int x = xcord.get(xcord.size() / 2);
+        int y = ycord.get(ycord.size() / 2);
+        int dist = 0;
+        for(int r = 0; r < grid.length; r++) {
+            for(int c = 0; c < grid[0].length; c++) {
+                if(grid[r][c] == 1) {
+                    dist += Math.abs(x - r) + Math.abs(y - c);
+                }  
+            }
+        }
+        return dist;
+    }
+
+    // leetcode 670. https://leetcode.com/problems/maximum-swap/
+    public int maximumSwap(int n) {
+        String num = n + "";
+        // convert number into string
+        char[] arr = num.toCharArray();
+
+        int[] lastIndxOfDigit = new int[10];
+        // travel and fill last index of digits
+        for(int i = 0; i < arr.length; i++) {
+            lastIndxOfDigit[arr[i] - '0'] = i;
+        }
+
+        // travel and find swapping point
+        for(int i = 0; i < arr.length; i++) {
+            int digit = arr[i] - '0';
+            int indx = i;
+            for(int j = 9; j > digit; j--) {
+                // greater digit have max index then set it in indx and break
+                if(lastIndxOfDigit[j] > i) {
+                    indx = lastIndxOfDigit[j];
+                    break;
+                }
+            }
+            if(indx != i) {
+                swap(arr, i, indx);
+                break;
+            }
+        }
+        String res = String.valueOf(arr);
+        // convert string into number
+        return Integer.parseInt(res);
+    }
+
+    // leetcode 119 https://leetcode.com/problems/pascals-triangle-ii/
+    public List<Integer> getRow(int n) {
+        List<Integer> res = new ArrayList<>();
+        long val = 1;
+        for(int r = 0; r <= n; r++) {
+            res.add((int)val);
+            val = val * (n - r) / (r + 1); 
+        }
+        return res;
+    }
+
+    // leetcode 537. https://leetcode.com/problems/complex-number-multiplication/
+    public String complexNumberMultiply(String num1, String num2) {
+        int a1 = Integer.parseInt(num1.substring(0, num1.indexOf("+")));
+        int b1 = Integer.parseInt(num1.substring(num1.indexOf("+") + 1, num1.length() - 1));
+
+        int a2 = Integer.parseInt(num2.substring(0, num2.indexOf("+")));
+        int b2 = Integer.parseInt(num2.substring(num2.indexOf("+") + 1, num2.length() - 1));
+
+        int a = a1 * a2 - b1 * b2;
+        int b = a1 * b2 + a2 * b1;
+        return a + "+" + b + "i";
+    }
+
+    // 2 Sum - target Sum Unique Pair
+    public static List<List<Integer>> twoSum_(int[] arr, int target) {
+        Arrays.sort(arr);
+        List<List<Integer>> res = new ArrayList<>();
+        int left = 0;
+        int right = arr.length - 1;
+
+        while(left < right) {
+            if(left != 0 && arr[left] == arr[left - 1]) {
+                left++;
+                continue;
+            }
+            int sum = arr[left] + arr[right];
+            if(sum == target) {
+                List<Integer> subres = new ArrayList<>();
+                subres.add(arr[left]);
+                subres.add(arr[right]);
+                res.add(subres);
+
+                left++;
+                right--;
+            } else if(sum > target) {
+                right--;
+            } else {
+                left++;
+            }
+        }
+        return res;
+    }
+
+    private static List<List<Integer>> twoSum(int[] arr, int st, int end, int target) {
+        int left = st;
+        int right = end;
+        List<List<Integer>> res = new ArrayList<>();
+        while(left < right) {
+            if(left != st && arr[left] == arr[left - 1]) {
+                left++;
+                continue;
+            }
+            int sum = arr[left] + arr[right];
+            if(sum == target) {
+                List<Integer> subres = new ArrayList<>();
+                subres.add(arr[left]);
+                subres.add(arr[right]);
+                res.add(subres);
+
+                left++;
+                right--;
+            } else if(sum > target) {
+                right--;
+            } else {
+                left++;
+            }
+        }
+        return res;
+    }
+
+    public static List<List<Integer>> threeSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+
+        for(int i = 0; i < nums.length - 2; i++) {
+            if(i != 0 && nums[i] == nums[i - 1])
+                continue;
+
+            int val1 = nums[i];
+            int smallTarget = target - val1;
+
+            List<List<Integer>> subres = twoSum(nums, i + 1, nums.length - 1, smallTarget);
+            for(List<Integer> list : subres) {
+                list.add(val1);
+                res.add(list);
+            }
+        }
+        return res;
+    }
+
+
     public static void main(String[] args) {
 
     }
