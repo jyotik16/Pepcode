@@ -633,6 +633,22 @@ public class dp {
         }
         return dp[target];
     }
+    
+    static int coinCombination_rec(int[] arr,int target,int indx,String psf) {
+		int count = 0;
+
+		if (target == 0) {
+			System.out.println(psf);
+			return 1;
+		}
+			
+		for (int i = indx; i < arr.length; i++) {
+			if (target - arr[i] >= 0)
+				count += coinCombination_rec(arr, target - arr[i], i,psf+arr[i]+" ");
+		}
+		return count;
+	}
+    
     public static HashMap<String, Integer> map = null;
     public static int coinChange_comb_rec_SubseqStyle(int[] coins, int indx, int target,
                  String psf, Integer[][] dp) {
