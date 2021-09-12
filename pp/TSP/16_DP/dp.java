@@ -770,6 +770,26 @@ public class dp {
         int v2 = knapsack01_memo(wts, vals, indx - 1, cap, dp);
         return dp[indx + 1][cap] = Math.max(v1, v2);
     }
+	
+	// my code
+	
+	static int knapsack1_memo(int val[],int wt[],int cap,int indx,int [][] dp) {
+		
+		if(indx == -1) {
+			return dp[indx + 1][cap] = 0; //why indx + 1
+		}
+		if(dp[indx][cap] != 0) //only
+			return dp[indx][cap];
+		
+		int v1 = 0;
+		if(cap - wt[indx]>=0)
+		 v1 = knapsack1_memo(val,wt,cap-wt[indx],indx - 1,dp) + val[indx];
+		
+		 int v2 = knapsack1_memo(val,wt,cap,indx - 1,dp);
+		 
+		 return dp[indx][cap] = Math.max(v1, v2);
+	}
+
 
     public static int knapsack01_tab(int[] wts, int[] vals, int indx, int Cap, int[][] dp) {
         
@@ -892,7 +912,9 @@ public class dp {
     }
 
     public static void knapsack() {
-    
+    	int [][] dp = new int[ar.length][cap + 1];
+   	int res = knapsack1_memo(ar,wt,cap,ar.length-1,dp);
+   	 System.out.println(res);
     }
 
     // ~~~~~~~~~~~~~~~~~~~Count Binary Strings~~~~~~~~~~
