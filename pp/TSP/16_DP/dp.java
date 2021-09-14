@@ -950,10 +950,10 @@ public class dp {
     }
 
     public static int countBinaryString_tab(int N) {
-        int[][] dp = new int[2][N];
+        int[][] dp = new int[N][2];
 
         dp[0][0] = 1;
-        dp[1][0] = 1;
+        dp[0][1] = 1;
 
         for(int n = 1; n < N; n++){
             dp[n][0] = dp[n - 1][1];
