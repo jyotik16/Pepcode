@@ -1160,6 +1160,33 @@ public class dp {
     }
 
     // ~~~~~~~~~~~~~~~~~Paint House~~~~~~~~~~~~~~
+static int paintHouse(int[][] cost,int indx,int lastcolor) {
+	//red -> 0 , green - >1 , blue -> 2
+	if(indx == cost.length) {
+		return 0;
+	}
+	int maxSum = (int)1e9;
+	if (lastcolor == 0) {
+		maxSum = Math.min(maxSum, paintHouse(cost, indx + 1, 1) + cost[indx][1]); // green
+		maxSum = Math.min(maxSum, paintHouse(cost, indx + 1, 2) + cost[indx][2]); // blue
+	} else if (lastcolor == 1) {
+		maxSum = Math.min(maxSum, paintHouse(cost, indx + 1, 0) + cost[indx][0]); // red
+		maxSum = Math.min(maxSum, paintHouse(cost, indx + 1, 2) + cost[indx][2]); // blue
+	} else {
+		maxSum = Math.min(maxSum, paintHouse(cost, indx + 1, 0) + cost[indx][0]); // red
+		maxSum = Math.min(maxSum, paintHouse(cost, indx + 1, 1) + cost[indx][1]); // green
+	}
+	return maxSum;	
+}
+
+static int paintHouse(int[][] cost) {
+	int red = paintHouse(cost,0,0);
+	int green = paintHouse(cost,0,1);
+	int blue = paintHouse(cost,0,2);
+	
+	return Math.min(red,Math.min(green, blue));
+}	
+	
     public static int paintHouse(int[][] cost) {
 
         int red = 0;
