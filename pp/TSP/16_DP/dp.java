@@ -1096,7 +1096,7 @@ public class dp {
             } else if(ch == 'b') {
                 b_count = 2 * b_count + a_count;
             } else {
-                c_count = 2 * b_count + c_count;
+                c_count = 2 * c_count + b_count;
             }
         }
 
