@@ -1319,6 +1319,15 @@ static int paintHouse(int[][] cost) {
         }
         return dp[n][k];
     }
+	{ // n,k 
+		dp [][] = {
+			0 0 0 0 
+			0 1 0 0 
+			0 1 1 0 
+			0 1 3 1 
+			0 1 7 6 
+			}
+	}
     
     // ~~~~~~~~~~~~~~~~Stock Buy Sell~~~~~~~~~~~~~~~~
     public static int stockBuySellOneTransaction(int[] price) {
