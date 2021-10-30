@@ -27,6 +27,31 @@ public class Kpartitions {
 		subArray(br, 3);
 		// display(ar);
 	}
+	
+	private static void ceilAndFloorInArray(int[] ar, int num) {
+		// TODO Auto-generated method stub
+		//10 20 30 40 50 ,, 33-> 30 40
+		int ceil = 0;
+		int floor = 0;
+		int i = 0;
+		int j = ar.length - 1;
+		while (i <= j) {
+			int mid = (i + j) / 2;
+			if (num<ar[mid]) {
+				ceil = ar[mid];
+				j = mid - 1;
+			} else if (num > ar[mid]) {
+				floor = ar[mid];
+				i = mid + 1;
+			} else {
+				ceil = floor = ar[mid];
+				break;
+			}
+
+		}
+		System.out.println(floor + " " + ceil);
+	}
+
 
 	static void subArray(int[] arr, int n) {
 
