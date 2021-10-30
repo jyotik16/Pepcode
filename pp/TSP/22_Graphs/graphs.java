@@ -596,6 +596,442 @@ public class graphs {
         return res;
     }
 
+    // lintcode 434. https://www.lintcode.com/problem/434/
+    class Point {
+        int x;
+        int y;
+        
+        Point() { x = 0; y = 0; }
+        
+        Point(int a, int b) { 
+            x = a; y = b;
+        }
+    }
+
+    public int find(int[] parent, int x) {
+        if(parent[x] == x) {
+            return x;
+        }
+
+        int temp = find(parent, parent[x]);
+        parent[x] = temp;
+        return temp;
+    }
+
+    public void union(int lx, int ly, int[] rank, int[] parent) {
+        if(rank[lx] > rank[ly]) {
+            parent[ly] = lx;
+        } else if(rank[lx] < rank[ly]) {
+            parent[lx] = ly;
+        } else {
+            parent[ly] = lx;
+            rank[lx]++;
+        }
+    }
+
+    public List<Integer> numIslands2(int n, int m, Point[] operators) {
+        if(operators == null) {
+            return new ArrayList<>();
+        }
+        int[] parent = new int[n * m];
+        Arrays.fill(parent, -1);
+        int[] rank = new int[n * m];
+
+        List<Integer> res = new ArrayList<>();
+        int count = 0;
+
+        for(Point p : operators) {
+            int row = p.x;
+            int col = p.y;
+
+            int boxNo = row * m + col;
+            if(parent[boxNo] != -1) {
+                res.add(count);
+                continue;
+            }
+            parent[boxNo] = boxNo;
+            rank[boxNo] = 1;
+            count++;
+
+            for(int d = 0; d < 4; d++) {
+                int r = row + xdir[d];
+                int c = col + ydir[d];
+
+                if(r < 0 || r >= n || c < 0 || c >= m || parent[r * m + c] == -1)
+                    continue;
+                
+                int bNo = r * m + c;
+                // find set leader
+                int lx = find(parent, bNo);
+                int ly = find(parent, boxNo);
+
+                // union them
+                if(lx != ly) {
+                    union(lx, ly, rank, parent);
+                    count--;
+                }
+            }
+            res.add(count);
+        }
+        return res;
+    }
+
+    // leetcode 684. https://leetcode.com/problems/redundant-connection/
+    public int[] findRedundantConnection(int[][] edges) {
+        // number of vertices
+        int n = edges.length;
+
+        int[] parent = new int[n + 1];
+        int[] rank = new int[n + 1];
+        for(int i = 0; i <= n; i++) {
+            rank[i] = 1;
+            parent[i] = i;
+        }
+
+        for(int[] edge : edges) {
+            int u = edge[0];
+            int v = edge[1];
+
+            // find set leader of both u and v
+            int lu = find(parent, u);
+            int lv = find(parent, v);
+            if(lu == lv) {
+                // it means u-v edge is responsible for cycle
+                return edge;
+            }
+            union(lu, lv, rank, parent);
+        }
+        return new int[0];
+    }
+
+    // leetcode 685. https://leetcode.com/problems/redundant-connection-ii/
+    private static int[] parent;
+    private static int[] rank;
+
+    private int find(int x) {
+        if(parent[x] == x) {
+            return x;
+        }
+        int temp = find(parent[x]);
+        parent[x] = temp;
+        return temp;
+    }
+
+    private boolean union(int x, int y) {
+        int lx = find(x);
+        int ly = find(y);
+
+        if(lx == ly) {
+            return true;
+        } else {
+            if(rank[lx] > rank[ly]) {
+                parent[ly] = lx;
+            } else if(rank[lx] < rank[ly]) {
+                parent[lx] = ly;
+            } else {
+                parent[ly] = lx;
+                rank[lx]++;
+            }
+        }
+        return false;
+    }
+
+    public int[] findRedundantDirectedConnection(int[][] edges) {
+        int n = edges.length;
+        int[] indegree = new int[n + 1]; // because index in 1 based
+        Arrays.fill(indegree, -1);
+        int blackList1 = -1;
+        int blackList2 = -1;
+
+        for(int i = 0; i < edges.length; i++) {
+            int v = edges[i][1];
+
+            if(indegree[v] == -1) {
+                indegree[v] = i;
+            } else {
+                blackList1 = i;
+                blackList2 = indegree[v];
+                break;
+            }
+        }
+
+        parent = new int[n + 1];
+        rank = new int[n + 1];
+        for(int i = 0; i <= n; i++) {
+            parent[i] = i;
+            rank[i] = 1;
+        }
+
+        // apply DSU and avoid blackList1 edge index, and check if graqph is cyclic or not
+        for(int i = 0; i < edges.length; i++) {
+            if(i == blackList1) {
+                continue;
+            }
+            int u = edges[i][0];
+            int v = edges[i][1];
+
+            boolean isCyclic = union(u, v);
+            if(isCyclic == true) {
+                if(blackList1 == -1) {
+                    return edges[i];
+                } else {
+                    return edges[blackList2];
+                }
+            }
+        }
+        return edges[blackList1];
+    }
+
+    // leetcode 1584. https://leetcode.com/problems/min-cost-to-connect-all-points/
+    public int minCostConnectPoints(int[][] coords) {
+        int size = coords.length * (coords.length - 1) / 2;
+        int[][] points = new int[size][3];
+
+        int indx = 0;
+        for(int i = 0; i < coords.length; i++) {
+            for(int j = i + 1; j < coords.length; j++) {
+                int dist = Math.abs(coords[j][0] - coords[i][0]) + Math.abs(coords[j][1] - coords[i][1]);
+                int[] point = {i, j, dist};
+                points[indx] = point;
+                indx++;
+            }
+        }
+        
+        // kruskal Algo, sort all the edges 
+        Arrays.sort(points, (val1, val2) -> Integer.compare(val1[2], val2[2]));
+
+        int[] parent = new int[coords.length];
+        int[] rank = new int[coords.length];
+
+        for(int i = 0; i < coords.length; i++) {
+            parent[i] = i;
+            rank[i] = 1;
+        }
+        int cost = 0;
+        for(int i = 0; i < size; i++) {
+            int u = points[i][0];
+            int v = points[i][1];
+            int wt = points[i][2];
+
+            int lu = find(parent, u);
+            int lv = find(parent, v);
+
+            if(lu == lv)
+                continue;
+            
+            union(lu, lv, rank, parent);
+            // add edge
+            cost += wt;
+        }
+        return cost;
+    }
+
+    // leetcode 990. https://leetcode.com/problems/satisfiability-of-equality-equations/
+    public boolean equationsPossible(String[] equations) {
+        // process '==' and union then
+        int[] parent = new int[26];
+        int[] rank = new int[26];
+        for(int i = 0; i < 26; i++) {
+            parent[i] = i;
+            rank[i] = 1;
+        }
+
+        for(int i = 0; i < equations.length; i++) {
+            if(equations[i].charAt(1) == '=') {
+                int x = equations[i].charAt(0) - 'a';
+                int y = equations[i].charAt(3) - 'a';
+
+                int lx = find(parent, x);
+                int ly = find(parent, y);
+
+                if(lx == ly) {
+                    continue;
+                }
+                union(lx, ly, rank, parent);
+            }
+        }
+        
+        // check set leader for '!=' equality, if same then return false;
+        for(int i = 0; i < equations.length; i++) {
+            if(equations[i].charAt(1) == '!') {
+                int x = equations[i].charAt(0) - 'a';
+                int y = equations[i].charAt(3) - 'a';
+                int lx = find(parent, x);
+                int ly = find(parent, y);
+                if(lx == ly) return false;
+            }
+        }
+        return true;
+    }
+
+    // leetcode 737, sentence similarity 2
+
+    private static HashMap<String, String> par; // parent
+    private static HashMap<String, Integer> ran; // rank
+
+    private static String find(String x) {
+        if(par.containsKey(x) == false) {
+            par.put(x, x);
+            ran.put(x, 1);
+        }
+
+        if(par.get(x).equals(x) == true) {
+            return x;
+        }
+        String temp = find(par.get(x));
+        par.put(x, temp);
+        return temp;
+    }
+
+    private static void union(String u, String v) {
+        String lx = find(u);
+        String ly = find(v);
+
+        if(lx.equals(ly) == false) {
+            if(ran.get(lx) > ran.get(ly)) {
+                par.put(ly, lx);
+            } else if(ran.get(lx) < ran.get(ly)) {
+                par.put(lx, ly);
+            } else {
+                par.put(ly, lx);
+                ran.put(lx, ran.get(lx) + 1);
+            }
+        }
+    }
+
+    public static boolean areSentencesSimilarTwo(String[] Sentence1, String[] Sentence2, String[][] pairs) {
+        par = new HashMap<>();
+        ran = new HashMap<>();
+
+        if(Sentence1.length != Sentence2.length) return false;
+
+        for(String[] pair : pairs) {
+            union(pair[0], pair[1]);
+        }
+
+        for(int i = 0; i < Sentence1.length; i++) {
+            String w1 = Sentence1[i];
+            String w2 = Sentence2[i];
+
+            if(w1.equals(w2) == true || find(w1).equals(find(w2)) == true) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ====================CYCLE=======================
+    // cycle in undirected graph, https://practice.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1
+    public boolean isCycle1(int V, ArrayList<ArrayList<Integer>> adj) {
+        
+    }
+
+    
+    // cycle in directed graph, https://practice.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1
+    public boolean isCyclic2(int V, ArrayList<ArrayList<Integer>> adj) {
+        
+    }
+
+    // leetcode 207, https://leetcode.com/problems/course-schedule/
+    public boolean canFinish(int n, int[][] edges) {
+        // prepare graph
+        ArrayList<ArrayList<Integer>> graph = new ArrayList<>();
+        for(int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        for(int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+        }
+        
+        // make an indegree array from graph
+        int[] indegree = new int[n];
+        for(int i = 0; i < n; i++) {
+            for(int nbr : graph.get(i)) {
+                indegree[nbr]++;
+            }
+        }
+
+        // add element in queue which have 0 indegree
+        Queue<Integer> qu = new LinkedList<>();
+        for(int i = 0; i < n; i++) {
+            if(indegree[i] == 0) {
+                qu.add(i);
+            }
+        }
+
+        int count = 0;
+        while(qu.size() > 0) {
+            // 1. get + remove
+            int rem = qu.remove();
+            // 2. print*
+            count++;
+            // 3. decrease indegree of nbr and if indegree become 0 then add in queue
+            for(int nbr : graph.get(rem)) {
+                indegree[nbr]--;
+                if(indegree[nbr] == 0) {
+                    qu.add(nbr);
+                }
+            }
+        }
+        return count == n;
+    }
+
+    // leetcode 210, https://leetcode.com/problems/course-schedule-ii/
+    public int[] findOrder(int n, int[][] edges) {
+        // prepare graph
+        ArrayList<ArrayList<Integer>> graph = new ArrayList<>();
+        for(int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        for(int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+        }
+        
+        // make an indegree array from graph
+        int[] indegree = new int[n];
+        for(int i = 0; i < n; i++) {
+            for(int nbr : graph.get(i)) {
+                indegree[nbr]++;
+            }
+        }
+
+        // add element in queue which have 0 indegree
+        Queue<Integer> qu = new LinkedList<>();
+        for(int i = 0; i < n; i++) {
+            if(indegree[i] == 0) {
+                qu.add(i);
+            }
+        }
+
+        int count = 0;
+        int[] res = new int[n];
+        int indx = n - 1;
+        while(qu.size() > 0) {
+            // 1. get + remove
+            int rem = qu.remove();
+            // 2. print*
+            res[indx] = rem;
+            indx--;
+            count++;
+            // 3. decrease indegree of nbr and if indegree become 0 then add in queue
+            for(int nbr : graph.get(rem)) {
+                indegree[nbr]--;
+                if(indegree[nbr] == 0) {
+                    qu.add(nbr);
+                }
+            }
+        }
+        if(count != n) {
+            res = new int[0];
+            return res;
+        }
+        return res;
+    }
+
+
+
     public static void main(String[] args) {
 
     }

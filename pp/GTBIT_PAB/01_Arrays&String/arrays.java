@@ -1090,10 +1090,352 @@ public class arrays {
     }
 
     // leetcode 239. https://leetcode.com/problems/sliding-window-maximum/
-    public int[] maxSlidingWindow(int[] nums, int k) {
-        
+    private int[] ngri(int[] arr) {
+        // ngri -> next greater on right (index)
+        int n = arr.length;
+        int[] ngr = new int[n];
+        Stack<Integer> st = new Stack<>(); // add index in stack
+        st.push(0);
+        for(int i = 1; i < n; i++) {
+            while(st.size() > 0 && arr[i] > arr[st.peek()]) {
+                ngr[st.pop()] = i;
+            }
+            st.push(i);
+        }
+        while(st.size() > 0) {
+            ngr[st.pop()] = n;
+        }
+        return ngr;
     }
 
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int n = nums.length;
+        int[] ngr = ngri(nums);
+        int[] res = new int[n - k + 1];
+
+        int j = 0;
+        for(int i = 0; i < res.length; i++) {
+            if(j < i) j = i;
+
+            while(ngr[j] < i + k) {
+                j = ngr[j];
+            }
+            res[i] = nums[j];
+        }
+        return res;
+    }
+
+    public class Interval {
+        int start;
+        int end;
+        public Interval(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
+    // meeting rooms lintcode 920. https://www.lintcode.com/problem/920/
+    public boolean canAttendMeetings(List<Interval> intervals) {
+        Collections.sort(intervals, (Interval a, Interval b) -> {
+            return a.start - b.start;
+        });
+
+        int end = intervals.get(0).end;
+        for(int i = 1; i < intervals.size(); i++) {
+            if(end > intervals.get(i).start) {
+                return false;
+            } else {
+                end = intervals.get(i).end;
+            }
+        }
+        return true;
+    }
+
+    // meeting rooms 2 lintcode 919. https://www.lintcode.com/problem/919/
+    public int minMeetingRooms(List<Interval> intervals) {
+        int n = intervals.size();
+        int[] start = new int[n];
+        int[] end = new int[n];
+
+        for(int i = 0; i < n; i++) {
+            start[i] = intervals.get(i).start;
+            end[i] = intervals.get(i).end;
+        } 
+
+        Arrays.sort(start);
+        Arrays.sort(end);
+        
+        int omax = 0;
+        int rooms = 0;
+        int i = 0; // for start
+        int j = 0; // for end
+        while(i < n) {
+            if(start[i] <= end[j]) {
+                rooms++;
+                i++;
+            } else {
+                rooms--;
+                j++;
+            }
+            omax = Math.max(omax, rooms);
+        }
+        return omax;
+    }
+
+    // leetcode 56. https://leetcode.com/problems/merge-intervals/
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (val1, val2) -> Integer.compare(val1[0], val2[0]));
+        ArrayList<int[]> list = new ArrayList<>();
+        int lsp = intervals[0][0];
+        int lep = intervals[0][1];
+
+        for(int i = 1; i < intervals.length; i++) {
+            int sp = intervals[i][0];
+            int ep = intervals[i][1];
+
+            if(sp > lep) {
+                // new interval is here
+                int[] subinterval = {lsp, lep};
+                list.add(subinterval);
+                lsp = sp;
+                lep = ep;
+            } else if(lep < ep) {
+                // partial merging
+                lep = ep;
+            } else {
+                // new interval is already covered in lsp and lep
+            }
+        }
+        int[] subinterval = {lsp, lep};
+        list.add(subinterval);
+        return list.toArray(new int[list.size()][]);
+    }
+
+    // leetcode 986. https://leetcode.com/problems/interval-list-intersections/
+    public int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
+        ArrayList<int[]> res = new ArrayList<>();
+        int i = 0; // pointing to first interval of first list
+        int j = 0; // pointing to first interval of second list
+
+        while(i < firstList.length && j < secondList.length) {
+            int st = Math.max(firstList[i][0], secondList[j][0]);
+            int end = Math.min(firstList[i][1], secondList[j][1]);
+
+            if(st <= end) {
+                int[] subres = {st, end};
+                res.add(subres);
+            }
+
+            // how to increment in pointers
+            if(firstList[i][1] < secondList[j][1]) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+        return res.toArray(new int[res.size()][]);
+    }
+
+    // leetcode 57. https://leetcode.com/problems/insert-interval/
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        // home work
+    }
+
+    // leetcode 853. https://leetcode.com/problems/car-fleet/
+    private class fleetHelper implements Comparable<fleetHelper> {
+        int pos;
+        int speed;
+        double time;
+
+        public fleetHelper(int pos, int speed, double time) {
+            this.pos = pos;
+            this.speed = speed;
+            this.time = time;
+        }
+
+        public int compareTo(fleetHelper o) {
+            return this.pos - o.pos;
+        }
+    }
+
+    public int carFleet(int target, int[] position, int[] speed) {
+        int n = speed.length;
+        fleetHelper[] data = new fleetHelper[n];
+        for(int i = 0; i < n; i++) {
+            data[i] = new fleetHelper(position[i], speed[i], (target - position[i]) * 1.0 / speed[i]);
+        }
+        Arrays.sort(data);
+        int count = 1;
+        double maxTime = data[n - 1].time;
+        for(int i = n - 2; i >= 0; i--) {
+            if(data[i].time > maxTime) {
+                count++;
+                maxTime = data[i].time;
+            }
+        }
+        return count;
+    }
+
+    // digit multiplier, https://practice.geeksforgeeks.org/problems/digit-multiplier3000/1
+    static String getSmallest(Long N) {
+        if(N == 1) return "1";
+
+        String res = "";
+        for(int num = 9; num >= 2; num--) {
+            while(N % num == 0) {
+                N = N / num;
+                res = num + res;
+            }
+        }
+        return N == 1 ? res : "-1";
+    }
+
+    // first negative, https://practice.geeksforgeeks.org/problems/first-negative-integer-in-every-window-of-size-k3345/1
+    public long[] printFirstNegativeInteger(long A[], int N, int K) {
+        long[] res = new long[N - K + 1];
+        int lastNeg = N;
+        // find first negative in last k size window;
+        for(int i = N - 1; i >= N - K; i--) {
+            if(A[i] < 0) {
+                lastNeg = i;
+            }
+        }
+
+        // iterate from N - k to 0
+        for(int i = N - K; i >= 0; i--) {
+            if(A[i] < 0) {
+                lastNeg = i;
+            }
+            if(i + K > lastNeg) {
+                // there exist a negative in range
+                res[i] = A[lastNeg];
+            } else {
+                res[i] = 0;
+            }
+        }
+        return res;
+    }
+
+    // leetcode 53. https://leetcode.com/problems/maximum-subarray/
+    public int maxSubArray(int[] nums) {
+        // kadane's Algorithm
+        int csum = 0;
+        int osum = Integer.MIN_VALUE;
+
+        for(int i = 0; i < nums.length; i++) {
+            if(csum < 0) {
+                csum = nums[i];
+            } else {
+                csum += nums[i];
+            }
+            osum = Math.max(osum, csum);
+        }
+        return osum;        
+    }
+
+    // k-concatenation link - https://www.codechef.com/problems/KCON
+    private static long kadanes1(int[] arr) {
+        long csum = 0;
+        long omax = Integer.MIN_VALUE;
+        for(int i = 0; i < arr.length; i++) {
+            if(csum >= 0) {
+                csum += arr[i];
+            } else {
+                csum = arr[i];
+            }
+            omax = Math.max(omax, csum);
+        }
+        return omax;
+    }
+
+    private static long kadanes12(int[] arr) {
+        int n = arr.length;
+        int[] res = new int[2 * n];
+        for(int i = 0; i < 2 * n; i++) {
+            res[i] = arr[i % n];
+        }
+        return kadanes1(res);
+    }
+
+    private static long kConcatenation(int[] arr, int k) {
+        if(k == 1) {
+            return kadanes1(arr);
+        }
+        long tsum = 0;
+        for(int val : arr) {
+            tsum += val;
+        }
+        if(tsum >= 0) {
+            return kadanes12(arr) + (tsum * (k - 2));
+        } else {
+            return kadanes12(arr);
+        }
+    }
+
+
+    // leetcode 134, https://leetcode.com/problems/gas-station/
+    public int maxProduct(int[] nums) {
+        int prod = 1;
+        int res = Integer.MIN_VALUE;
+        int n = nums.length;
+        // left product
+        for(int i = 0; i < n; i++) {
+            if(nums[i] == 0) {
+                res = Math.max(res, nums[i]);
+                prod = 1;
+            } else {
+                prod *= nums[i];
+                res = Math.max(prod, res);
+            }
+        }
+
+        // right product
+        prod = 1;
+        for(int i = n - 1; i >= 0; i--) {
+            if(nums[i] == 0) {
+                res = Math.max(res, nums[i]);
+                prod = 1;
+            } else {
+                prod *= nums[i];
+                res = Math.max(prod, res);
+            }
+        }
+        return res;
+    }
+    // leetcode 152, https://leetcode.com/problems/maximum-product-subarray/
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        int gasSum = 0;
+        int costSum = 0;
+        
+        for(int i = 0; i < gas.length; i++) {
+            gasSum += gas[i];
+            costSum += cost[i];
+        }
+        if(gasSum - costSum < 0) {
+            return -1;
+        }
+
+        int indx = 0;
+        int prefixSum = 0;
+        int min = Integer.MAX_VALUE;
+        for(int i = 0; i < gas.length; i++) {
+            prefixSum += gas[i] - cost[i];
+
+            if(prefixSum < min) {
+                min = prefixSum;
+                indx = i;
+            }
+        }
+        return (indx + 1) % gas.length;
+    }
+
+    // maximum sum of smallest and second smallest in all subarrays, https://practice.geeksforgeeks.org/problems/max-sum-in-sub-arrays0824/1#
+    public static long pairWithMaxSum(long arr[], long N) {
+        long sum = Integer.MIN_VALUE;
+        for(int i = 0; i < N - 1; i++) {
+            sum = Math.max(sum, arr[i] + arr[i + 1]);
+        }
+        return sum;
+    }
 
     public static void main(String[] args) {
         
