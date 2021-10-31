@@ -792,11 +792,30 @@ public class arrays {
         }
         return ans;
     }
+    
+    private static ArrayList<Integer> sieve2(int n) {
+        boolean[] arr = new boolean[n + 1];
+        //false->prime 
+        for(int i = 2; i * i <= n; i++) {
+            if(arr[i] == false) {
+            	for(int j = 2*i;j<arr.length;j+=i) {
+            		arr[j]=true;
+            	}
+            }
+        }
+        ArrayList<Integer> ans = new ArrayList<>();
+        for(int i = 2; i <= n; i++) {
+            if(arr[i] == false) {
+                ans.add(i);
+            }
+        }
+        return ans;
+    }
 
     // segmented sieve
     public static void segmentedSieveAlgo(int a, int b) {
         int rootb = (int)Math.sqrt(b);
-        ArrayList<Integer> primes = sieve(rootb);
+        ArrayList<Integer> primes = sieve2(rootb);
         // prime[i] = false, i is prime
 
         boolean[] isprime = new boolean[b - a + 1];
