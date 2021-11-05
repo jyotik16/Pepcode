@@ -24,9 +24,193 @@ public class Kpartitions {
 		// MergeTwoSortedArray(ar,ar);
 		// ar = mergeSort(ar,0,ar.length-1);
 		// subsetsOfarr(br); //subsequence==subsets
-		subArray(br, 3);
+		//subArray(br, 3);
 		// display(ar);
+		// ceilAndFloorInArray(ar, 33);
+		int[] ar = { 10, 5, 9, 1, 11, 8, 6, 15, 5, 12, 2 };
+		// longestSubsequenceLength(ar);
+		//findAllKSmallestElements(ar, 3);
+		// display(ar);
+		Integer [][] cr = { {1,3},{2,4},{6,8},{10,14},{7,9}};
+		//mergeOverLappingIntervals(cr);
+		//KSum(ar,20,3);
 	}
+	private static void KSum(int[] ar, int target, int k) {
+		
+		Arrays.sort(ar);
+		List<List<Integer>> ans = _KSum(ar,target,0,k);
+		System.out.println(ans);
+//		ans.stream().
+//		forEach(list->list.stream().forEach(l->System.out.print(l+",")));
+		
+	}
+
+	private static List<List<Integer>> _KSum(int[] ar, int target, int si, int k) {
+		if(k == 2) {
+			return twoSum(ar,target,si,ar.length-1);
+		}
+		int n = ar.length;
+		List<List<Integer>> res = new ArrayList<>();
+		for(int i = si; i<n-(k-1);i++) {
+			if(i != si && ar[i] == ar[i-1]) {
+				continue;
+			}
+			int val1 = ar[i]; int targ = target-val1;
+			List<List<Integer>> subres = _KSum(ar,targ,i + 1,k-1);
+			
+			for(List<Integer> list:subres) {
+				list.add(val1); //val1 add 
+				res.add(list); //rem add in main list
+			}
+		}
+		return res;
+	}
+
+	private static List<List<Integer>> twoSum(int[] ar, int target, int si, int end) {
+		List<List<Integer>> ans = new ArrayList<>();
+		int left = si; int right = end;
+		while(left<right) {
+			if(left != si && ar[left] == ar[left - 1]) {
+                left++;
+                continue;
+            }
+			int sum = ar[left] + ar[right];
+			if(sum == target) {
+				List<Integer> subres = new ArrayList<>();
+                subres.add(ar[left]);
+                subres.add(ar[right]);
+                ans.add(subres);
+
+                left++;
+                right--;
+			}else if(sum>target) {
+				right--;
+			}else {
+				left++;
+			}
+		}
+		return ans;
+	}
+
+	private static void mergeOverLappingIntervals(Integer[][] cr) {
+		Stack<Pair> st = new Stack<Pair>();
+		Arrays.sort(cr,(val1, val2) -> Integer.compare(val1[0], val2[0]));
+		
+		st.push(new Pair(cr[0][0],cr[0][1]));
+		
+		Pair[] pairs = new Pair[cr.length];
+        
+		for (int i = 0; i < cr.length; i++) {
+            pairs[i] = new Pair(cr[i][0], cr[i][1]);
+        }
+      //  Arrays.sort(pairs,(a,b)->a.compareTo(b));
+		for(int i = 1; i < pairs.length; i++) {
+			Pair top = st.peek();
+			Pair p = pairs[i];
+			
+			if(p.sp<top.sp) {
+				if(p.ep>top.ep) {
+					top.ep = p.ep;
+				}
+			}else {
+				st.push(p);
+			}
+		}		
+		
+		while (st.size() > 0) {
+            Pair rem = st.pop();
+            System.out.println(rem.sp + " " + rem.sp);
+        }
+		
+	}
+
+	static class  Pair implements Comparable<Pair>{
+		int sp;
+		int ep;
+		Pair(int sp,int ep){
+			this.sp = sp;
+			this.ep = ep;
+		}
+		
+		
+		  public int compareTo(Pair other)
+		  {	if(this.sp!=other.sp)
+		  			return this.sp-other.sp;
+		  		else
+		  			return this.ep-other.sp;
+		  }
+		 
+	}
+	
+	//only using 2 D array
+	public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (val1, val2) -> Integer.compare(val1[0], val2[0]));
+        ArrayList<int[]> list = new ArrayList<>();
+        int lsp = intervals[0][0]; // last interval starting point
+        int lep = intervals[0][1]; // last interval ending point
+
+        for(int i = 1; i < intervals.length; i++) {
+            int sp = intervals[i][0];
+            int ep = intervals[i][1];
+            
+            if(lep < sp) {
+                // new interval is found
+                int[] sublist = {lsp, lep};
+                list.add(sublist);
+                lsp = sp;
+                lep = ep;
+            } else if(lep < ep){
+                // partially overlapping
+                lep = ep;
+            } else {
+                // fully overlapping -> nothing to do
+            }
+        }
+        int[] sublist = {lsp, lep};
+        list.add(sublist);
+        return list.toArray(new int[list.size()][]);
+    }
+
+	private static ArrayList<Integer> sieve(int n) {
+		boolean[] arr = new boolean[n + 1];
+		// false->prime
+		for (int i = 2; i * i <= n; i++) {
+			if (arr[i] == false) {
+				for (int j = 2 * i; j < arr.length; j += i) {
+					arr[j] = true;
+				}
+			}
+		}
+		ArrayList<Integer> ans = new ArrayList<>();
+		for (int i = 2; i <= n; i++) {
+			if (arr[i] == false) {
+				ans.add(i);
+			}
+		}
+		return ans;
+	}
+
+	private static void findAllKSmallestElements(int[] ar, int k) {
+		// TODO Auto-generated method stub
+		PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.reverseOrder());
+		// Step1
+		for (int i = 0; i < ar.length; i++) {
+			if (i < k) {
+				pq.add(ar[i]);
+			} else {
+				if (ar[i] < pq.peek()) {
+					pq.remove();
+					pq.add(ar[i]);
+				}
+			}
+		}
+
+		// Step2
+		while (pq.size() > 0) {
+			System.out.print(pq.remove() + " ");
+		}
+	}
+
 	
 	private static void ceilAndFloorInArray(int[] ar, int num) {
 		// TODO Auto-generated method stub
