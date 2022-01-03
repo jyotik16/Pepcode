@@ -296,88 +296,115 @@ public class evaluate{
         return vstack.pop();
     }
 
-    // leetcode 636, https://leetcode.com/problems/exclusive-time-of-functions/
-    private class EThelper {
-        int id;
-        int stime;
-        int cet; // child execution time
-
-        public EThelper(int id, int stime, int cet) {
-            this.id = id;
-            this.stime = stime;
-            this.cet = cet;
-        }
-    }
-    public int[] exclusiveTime(int n, List<String> logs) {
-        // n-> number of IDs
-        int[] res = new int[n];
-        Stack<EThelper> st = new Stack<>();
+    // leetcode 641, https://leetcode.com/problems/design-circular-deque/
+    class MyCircularDeque {
+        private class Node {
+            int data;
+            Node next;
         
-        for(String str : logs) {
-            String[] info = str.split(":");
-            int id = Integer.parseInt(info[0]);
-            String status = info[1];
-            int timeStamp = Integer.parseInt(info[2]);
+            public Node(int data) {
+                this.data = data;
+                this.next = null;
+            }
+        }
 
-            if(status.equals("start")) {
-                st.push(new EThelper(id, timeStamp, 0));
+        private Node head = null;
+        private Node tail = null;
+        private int size = 0;
+        private int limit = 0;
+
+        public MyCircularDeque(int k) {
+            this.limit = k;
+        }
+        
+        private void handleAddWhenSize0(int val) {
+            Node nn = new Node(val);
+            head = tail = nn;
+            size = 1;
+        }
+
+        public boolean insertFront(int value) {
+            if(this.size == limit) {
+                return false;
+            } else if(this.size == 0) {
+                handleAddWhenSize0(value);
             } else {
-                int fn_diff = timeStamp - st.peek().stime + 1; // function difference time
-                int etime = fn_diff - st.peek().cet;  // child execution time
+                Node nn = new Node(value);
+                nn.next = head;
+                head = nn;
+                this.size++;
+            }
+            return true;
+        }
+        
+        public boolean insertLast(int value) {
+            if(this.size == limit) {
+                return false;
+            } else if(this.size == 0) {
+                handleAddWhenSize0(value);
+            } else {
+                Node nn = new Node(value);
+                tail.next = nn;
+                tail = nn;
+                this.size++;
+            }
+            return true;
+        }
 
-                res[id] += etime;
-                st.pop();
-                if(st.size() > 0) {
-                    st.peek().cet += fn_diff;
+        private void handleRemoveWhenSize1() {
+            head = tail = null;
+            this.size = 0;
+        }
+
+        public boolean deleteFront() {
+            if(this.size == 0) {
+                return false;
+            } else if(this.size == 1) {
+                handleRemoveWhenSize1();
+            } else {
+                this.head = this.head.next;
+                this.size--;
+            }
+            return true;
+        }
+        
+        public boolean deleteLast() {
+            if(this.size == 0) {
+                return false;
+            } else if(this.size == 1) {
+                handleRemoveWhenSize1();
+            } else {
+                Node nn = head;
+                int indx = 0;
+                while(indx < size - 1) {
+                    nn = nn.next;
+                    indx++;
                 }
+                nn.next = null;
+                this.tail = nn;
+                this.size--;
             }
+            return true;
         }
-        return res;
-    }
-
-    // leetcode 456, https://leetcode.com/problems/132-pattern/
-    public boolean find132pattern(int[] nums) {
         
-    }
-
-    // leetcode 735, https://leetcode.com/problems/asteroid-collision/
-    public int[] asteroidCollision(int[] asteroids) {
-        Stack<Integer> st = new Stack<>();
-        for(int val : asteroids) {
-            if(val > 0) {
-                st.push(val);
-                continue;
-            }
-            // val is -ve
-            // peek is positive but smaller in temrs of size then pop untile this condition will not break
-            while(st.size() > 0 && st.peek() < -val && st.peek() > 0) {
-                st.pop();
-            }
-            if(st.size() > 0 && st.peek() == -val) {
-                st.pop(); // equal in size but opposite in direction
-            } else if(st.size() == 0 || st.peek() < 0) {
-                st.push(val);
-            } else {
-                // nothing to do
-            }
+        public int getFront() {
+            if(this.size == 0) return -1;
+            return head.data;
         }
-        int[] res = new int[st.size()];
-        for(int i = res.length - 1; i >= 0; i--) {
-            res[i] = st.pop();
-        }
-        return res;
-    }
-
-    // leetcode 402, https://leetcode.com/problems/remove-k-digits/
-    public String removeKdigits(String num, int k) {
-        ArrayList<Character> 
-    }
-
-    // leetcode 316, https://leetcode.com/problems/remove-duplicate-letters/
-    public String removeDuplicateLetters(String s) {
         
+        public int getRear() {
+            if(this.size == 0) return -1;
+            return tail.data;
+        }
+        
+        public boolean isEmpty() {
+            return this.size == 0;
+        }
+        
+        public boolean isFull() {
+            return this.size == this.limit;
+        }
     }
-
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String exp = br.readLine();
