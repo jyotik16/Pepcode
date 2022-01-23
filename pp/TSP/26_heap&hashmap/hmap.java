@@ -916,7 +916,388 @@ public class hmap {
         System.out.println(res.size());
         for(int val : res) System.out.print(val + " ");
 	}
+
+    // k anagram
+    public static boolean areKAnagrams(String s1, String s2, int k) {
+		if(s1.length() != s2.length()) return false;
+        HashMap<Character, Integer> map = new HashMap<>();
+        // freq. map for s1
+        for(int i = 0; i < s1.length(); i++) {
+            char ch = s1.charAt(i);
+            map.put(ch, map.getOrDefault(ch, 0) + 1);
+        }
+        // reduce mapping from s2
+        for(int i = 0; i < s2.length(); i++) {
+            char ch = s2.charAt(i);
+            if(map.getOrDefault(ch, 0) > 0) {
+                map.put(ch, map.get(ch) - 1);
+            }
+        }
+        // add +ve count
+        int count = 0;
+        for(char ch : map.keySet()) {
+            count += map.get(ch);
+        }
+        return count <= k;
+	}
     
+    // group anagrams
+    public static ArrayList<ArrayList<String>> groupAnagrams(String[] strs) {
+		HashMap<HashMap<Character, Integer>, ArrayList<String>> map = new HashMap<>();
+
+        for(String str : strs) {
+            HashMap<Character, Integer> fmap = new HashMap<>();
+            for(int i = 0; i < str.length(); i++) {
+                char ch = str.charAt(i);
+                fmap.put(ch, fmap.getOrDefault(ch, 0) + 1);
+            }
+
+            if(map.containsKey(fmap) == true) {
+                map.get(fmap).add(str);
+            } else {
+                ArrayList<String> list = new ArrayList<>();
+                list.add(str);
+                map.put(fmap, list);
+            }
+        }
+        ArrayList<ArrayList<String>> res = new ArrayList<>();
+        for(ArrayList<String> list : map.values()) {
+            res.add(list);
+        }
+        return res;
+	}
+
+    // group shifted strings
+    private static String getStringCode(String str) {
+        String code = "";
+        for(int i = 1; i < str.length(); i++) {
+            char ch1 = str.charAt(i - 1);
+            char ch2 = str.charAt(i);
+            int val = (int)(ch2 - ch1);
+            if(val >= 0) {
+                code += val;
+            } else { 
+                code += (val + 26);
+            }
+            code += "#";
+        }
+        code += ".";
+        return code;
+    }
+
+    public static ArrayList<ArrayList<String>> groupShiftedStrings(String[] strs) {
+		HashMap<String, ArrayList<String>> map = new HashMap<>();
+        
+        for(String str : strs) {
+            String code = getStringCode(str);
+            if(map.containsKey(code) == true) {
+                map.get(code).add(str);
+            } else {
+                ArrayList<String> list = new ArrayList<>();
+                list.add(str);
+                map.put(code, list);
+            }
+        }
+
+        ArrayList<ArrayList<String>> res = new ArrayList<>();
+        for(ArrayList<String> list : map.values()) {
+            res.add(list);
+        }
+        return res;
+	}
+
+    // isomorphic strings
+    public static boolean isIsomorphic(String s, String t) {
+        if(s.length() != t.length()) return false;
+
+        HashMap<Character, Character> map = new HashMap<>();
+        HashSet<Character> set = new HashSet<>();
+
+        for(int i = 0; i < s.length(); i++) {
+            char ch1 = s.charAt(i);
+            char ch2 = t.charAt(i);
+
+            if(map.containsKey(ch1) == true) {
+                if(map.get(ch1) != ch2) return false;
+            } else {
+                if(set.contains(ch2) == true) {
+                    return false;
+                } else {
+                    map.put(ch1, ch2);
+                    set.add(ch2);
+                }
+            }
+        }
+        return true;
+    }
+
+    // word pattern
+    public static boolean wordPattern(String pattern, String strs) {
+        String[] str = strs.split(" ");
+        HashMap<Character, String> map = new HashMap<>();
+        HashSet<String> set = new HashSet<>();
+
+        for(int i = 0; i < pattern.length(); i++) {
+            char ch1 = pattern.charAt(i);
+            String ch2 = str[i];
+
+            if(map.containsKey(ch1) == true) {
+                if(map.get(ch1).equals(ch2) == false) return false;
+            } else {
+                if(set.contains(ch2) == true) {
+                    return false;
+                } else {
+                    map.put(ch1, ch2);
+                    set.add(ch2);
+                }
+            }
+        }
+        return true;
+	}
+
+    // check arithmetic Sequ
+    public static boolean checkArithMaticSeq(int[] arr) {
+        // find min and max and add element in hashset 
+        if(arr.length <= 1) return true; 
+        HashSet<Integer> set = new HashSet<>();
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+
+        for(int val : arr) {
+            min = Math.min(min, val);
+            max = Math.max(max, val);
+            set.add(val);
+        }
+
+        int n = arr.length;
+        int d = (max - min) / (n - 1);
+        int sum = min;
+        while(sum < max) {
+            sum += d;
+            if(set.contains(sum) == false) return false;
+        }
+        return true;
+    }
+
+    // rabbits in forest, leetcode 781
+    public int numRabbits(int[] arr) {
+        HashMap<Integer, Integer> fmap = new HashMap<>();
+        for(int val : arr) {
+            fmap.put(val, fmap.getOrDefault(val, 0) + 1);
+        }
+        int count = 0;
+        for(int key : fmap.keySet()) {
+            int val = fmap.get(key);
+            count += (key + 1) * (int)Math.ceil(val * 1.0 / (key + 1));
+        }
+        return count;
+    }
+
+    // leetcode 166
+    public static String fractionToDecimal(int nn, int dd) {
+        if(nn == 0) return "0";
+        long num = nn;
+        long den = dd;
+        boolean n1 = num < 0;
+        boolean n2 = den < 0;
+        num = Math.abs(num);
+        den = Math.abs(den);
+        StringBuilder ans = new StringBuilder();
+        long q = num / den;
+        long r = num % den;
+        ans.append(q);
+        if(r == 0) {
+            if((n1 == true && n2 == false) || (n1 == false && n2 == true)) {
+            ans.insert(0, '-');
+        }
+            return ans.toString();
+        }
+        ans.append(".");
+        HashMap<Long, Integer> map = new HashMap<>();
+        while(r != 0) {
+            map.put(r, ans.length());
+            r *= 10;
+            q = r / den;
+            r = r % den;
+            ans.append(q);
+            if(map.containsKey(r) == true) {
+                // insert bracket
+                int si = map.get(r);
+                ans.insert(si, '(');
+                ans.append(")");
+                break;
+            }
+        }
+        if((n1 == true && n2 == false) || (n1 == false && n2 == true)) {
+            ans.insert(0, '-');
+        }
+        return ans.toString();
+    }
+
+    // count equivalent subarray
+    public static int countEquivalentSubArray(int[] arr) {
+        int n = arr.length;
+        HashSet<Integer> set = new HashSet<>();
+        for(int val : arr) {
+            set.add(val);
+        }
+        int k = set.size();
+
+        // solve, number of subarrays having k distinct elements, [imp : K is distinct element in whole array]
+        int acq = -1;
+        int rel = -1;
+        int count = 0;
+        HashMap<Integer, Integer> map = new HashMap<>();
+        while(true) {
+            boolean flag1 = false;
+            boolean flag2 = false;
+            // acquire
+            while(acq < n - 1 ) {
+                flag1 = true;
+                acq++;
+                int val = arr[acq];
+                map.put(val, map.getOrDefault(val, 0) + 1);
+                if(map.size() == k) {
+                    count += n - acq;
+                    break;
+                }
+            }
+            // release
+            while(rel < acq) {
+                flag2 = true;
+                rel++;
+                int val = arr[rel];
+                map.put(val, map.get(val) - 1);
+                if(map.get(val) == 0) {
+                    map.remove(val);
+                }
+
+                if(map.size() == k) {
+                    count += n - acq;
+                } else {
+                    break;
+                }
+            }
+            if(flag1 == false && flag2 == false) {
+                break;
+            }
+        }
+        return count;
+    }
+
+    // pair with equal sum
+    public static boolean pairWithEqualSum(int[] arr) {
+        HashSet<Integer> set = new HashSet<>();
+        for(int i = 0; i < arr.length; i++) {
+            for(int j = i + 1; j < arr.length; j++) {
+                int sum = arr[i] + arr[j];
+                if(set.contains(sum) == true) {
+                    return true;
+                } else {
+                    set.add(sum);
+                }
+            }
+        }
+        return false;
+    }
+
+    // pair with given sum
+    public static int pairWithGivenSum(int[][] num1, int[][] num2, int k) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for(int i = 0; i < num1.length; i++) {
+            for(int j = 0; j < num1[0].length; j++) {
+                map.put(num1[i][j], map.getOrDefault(num1[i][j], 0) + 1);
+            }
+        }
+        int count = 0;
+        for(int i = 0; i < num2.length; i++) {
+            for(int j = 0; j < num2[0].length; j++) {
+                count += map.getOrDefault(k - num2[i][j], 0);
+            }
+        }
+        return count;
+	}
+
+    // smallest subarray with all the occurrence of most frequent element
+    public static void printMostFreqElementArray(int[] arr) {
+        HashMap<Integer, Integer> fmap = new HashMap<>(); // frequency map
+        HashMap<Integer, Integer> imap = new HashMap<>(); // index map
+
+        int mfreq = 0;
+        int si = 0;
+        int ei = 0;
+        int len = 0;
+
+        for(int i = 0; i < arr.length; i++) {
+            int val = arr[i];
+            if(fmap.containsKey(val) == true) {
+                // upgrade freqeuncy
+                fmap.put(val, fmap.getOrDefault(val, 0) + 1);
+            } else {
+                // insert element with freq. 1, set starting index
+                fmap.put(val, 1);
+                imap.put(val, i);
+            }
+
+            if(mfreq < fmap.get(val)) {
+                mfreq = fmap.get(val);
+                si = imap.get(val);
+                ei = i;
+                len = ei - si + 1;
+            } else if(mfreq == fmap.get(val)) {
+                int nlen = i - imap.get(val) + 1; // new length
+                if(nlen < len) {
+                    si = imap.get(val);
+                    ei = i;
+                    len = nlen;
+                }
+            } else {
+                // nothing to do
+            }
+        }
+        System.out.println(arr[si]);
+        System.out.println(si);
+        System.out.println(ei);
+    }
+
+    // leetcode 914
+    private int gcd(int a, int b) {
+        if(b == 0) return a;
+        return gcd(b, a % b);
+    }
+
+    public boolean hasGroupsSizeX(int[] deck) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+
+        for(int i = 0; i < deck.length; i++) {
+            int val = deck[i];
+            map.put(val, map.getOrDefault(val, 0) + 1);
+        }
+        int ans = 0;
+        for(int key : map.keySet()) {
+            int freq = map.get(key);
+            ans = gcd(ans, freq);
+        }
+        return ans >= 2;
+    }
+
+    // brick wall, leetcode 554,
+    public int leastBricks(List<List<Integer>> walls) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int joint = 0;
+        for(List<Integer> layer : walls) {
+            int sum = 0;
+            for(int i = 0; i < layer.size() - 1; i++) {
+                sum += layer.get(i);
+                map.put(sum, map.getOrDefault(sum, 0) + 1);
+                if(map.get(sum) > joint) {
+                    joint = map.get(sum);
+                }
+            }
+        }
+        return walls.size() - joint;
+    }
+
     public static void main(String[] args) {
         
     }
