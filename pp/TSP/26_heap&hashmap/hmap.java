@@ -911,7 +911,7 @@ public class hmap {
             if(smap.get(relCh) == 0) smap.remove(relCh);
         }
         if(match(smap, pmap) == true) {
-            res.add(s.length() - 1 - p.length());
+            res.add(s.length() - p.length());
         }
         System.out.println(res.size());
         for(int val : res) System.out.print(val + " ");
