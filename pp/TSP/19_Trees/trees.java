@@ -286,7 +286,18 @@ public class trees {
     }
 
     // leetcode 98. https://leetcode.com/problems/validate-binary-search-tree/
-
+    static TreeNode prev = null;
+  public static boolean isValidBST(TreeNode root) {
+    if (root == null) return true;
+    boolean lres = true; boolean rres = true;
+    if(root.left != null)
+        lres = isValidBST(root.left);
+    if (prev != null && prev.val >= root.val) return false;
+        prev = root;
+    if(root.right != null)
+        rres = isValidBST(root.right);
+    return rres && lres;
+  }
 
     // leetcode 99. https://leetcode.com/problems/recover-binary-search-tree/
     // pointers[0] -> prev
