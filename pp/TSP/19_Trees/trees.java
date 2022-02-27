@@ -298,6 +298,36 @@ public class trees {
         rres = isValidBST(root.right);
     return rres && lres;
   }
+    
+  // leetcode 98. https://leetcode.com/problems/validate-binary-search-tree/
+   static class BSTPair{
+        boolean isBST; int min; int max;
+    }
+    
+    public static BSTPair BST(TreeNode node){
+        
+         if(node == null){
+            BSTPair bst = new BSTPair();
+            bst.max = Integer.MIN_VALUE; 
+            bst.min = Integer.MAX_VALUE;
+            bst.isBST = true;
+            return bst;
+        }
+        BSTPair lp = BST(node.left);
+        BSTPair rp = BST(node.right);
+        BSTPair mp = new BSTPair();
+        mp.isBST = lp.isBST && rp.isBST 
+        && (node.val >= lp.max && node.val <= rp.min);
+        mp.min = Math.min(node.val, Math.min(lp.min,rp.min));
+        mp.max = Math.max(node.val, Math.max(lp.max,rp.max));
+        
+        return mp;
+    }
+
+    public static boolean isValidBST(TreeNode root) {
+       BSTPair res = BST(root);
+        return res.isBST;
+    } 
 
     // leetcode 99. https://leetcode.com/problems/recover-binary-search-tree/
     // pointers[0] -> prev
