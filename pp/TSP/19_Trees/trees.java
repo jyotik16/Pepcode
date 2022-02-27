@@ -625,6 +625,7 @@ public class trees {
             }
             return res;
         }
+    
 
     // top view
     // link : https://practice.geeksforgeeks.org/problems/top-view-of-binary-tree/1
@@ -655,6 +656,45 @@ public class trees {
             }
         }
         return res;
+    }
+    
+    //Letf View
+    public static ArrayList<Integer> leftView(TreeNode root) {
+        ArrayList<Integer> ans = new ArrayList<Integer>();
+        if(root == null) return null;
+        LinkedList<TreeNode> qu = new LinkedList<>();
+        qu.addLast(root);
+        
+        while(qu.size()>0){
+            int sz = qu.size();
+            ans.add(qu.getFirst().val);
+            while(sz-->0){
+                TreeNode rn = qu.removeFirst();
+                if(rn.left!=null) qu.addLast(rn.left);
+                if(rn.right!=null) qu.addLast(rn.right);
+            }
+        }
+        return ans;
+    }
+    //Right View
+    public static ArrayList<Integer> rightView(TreeNode root) {
+       ArrayList<Integer> ans = new ArrayList<Integer>();
+        if(root == null) return null;
+        LinkedList<TreeNode> qu = new LinkedList<>();
+        qu.addLast(root);
+        
+        while(qu.size()>0){
+            int sz = qu.size();
+            ans.add(qu.getFirst().val);
+            while(sz-->0){
+                TreeNode rn = qu.removeFirst();
+                if(rn.right!=null) qu.addLast(rn.right);
+                if(rn.left!=null) qu.addLast(rn.left);
+                
+            }
+        }
+        return ans;
+
     }
 
     // bottom view
