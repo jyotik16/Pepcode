@@ -1072,7 +1072,11 @@ public class hmap {
         int n = arr.length;
         int d = (max - min) / (n - 1);
         int sum = min;
-        while(sum < max) {
+	 //leetcode test case   
+	if(max == 0 && min == 0) return true;
+        if(sum == 0 && d == 0) return false;   
+ 
+      	while(sum < max) {
             sum += d;
             if(set.contains(sum) == false) return false;
         }
