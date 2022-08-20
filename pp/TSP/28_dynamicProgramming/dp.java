@@ -1023,17 +1023,18 @@ public class dp {
     }
 
     // count distinct subseq.
-    private static int countDistinctSubseq(String str) {
+    private static long countDistinctSubseq(String str) {
         int n = str.length();
-        int[] dp = new int[n + 1];
+        long[] dp = new long[n + 1];
         dp[0] = 1;
         dp[1] = 2;
         HashMap<Character, Integer> map = new HashMap<>();
         map.put(str.charAt(0), 0);
         for(int i = 2; i <= n; i++) {
             char ch = str.charAt(i - 1);
-            int prevVal = map.containsKey(ch) == true ? dp[map.get(ch)] : 0;
+            long prevVal = map.containsKey(ch) == true ? dp[map.get(ch)] : 0;
             dp[i] = 2 * dp[i - 1] - prevVal;
+		map.put(ch,i-1);
         }
         // subtract 1 for all no's
         return dp[n] - 1;
