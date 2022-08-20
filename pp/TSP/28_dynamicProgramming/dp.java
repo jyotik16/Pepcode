@@ -971,6 +971,8 @@ public class dp {
     }
 //Method -2
 	public int nthSuperUglyNumber(int n, int[] primes) {
+		if(n==1)
+            return 1;
        int m = primes.length;       
         int [] dp = new int[n+1];        
         PriorityQueue<Pair> pq = new PriorityQueue<>();
