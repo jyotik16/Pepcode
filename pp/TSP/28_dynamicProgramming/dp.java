@@ -945,6 +945,63 @@ public class dp {
         }
         return dp[n - 1];
     }
+//Leetcode 313 super ugly Number
+	//method-1
+	public int nthSuperUglyNumber(int n, int[] primes) {
+        int m = primes.length;
+        int pointers[] = new int[m];
+        Arrays.fill(pointers,1);
+        
+        int [] dp = new int[n+1];
+        dp[1] = 1;
+        
+        for(int i=2;i<=n;i++){
+            int min = Integer.MAX_VALUE;
+            for(int j=0;j<m;j++){
+                min = Math.min(min,primes[j] * dp[pointers[j]]);
+            }
+            dp[i] = min;
+            for(int j=0;j<m;j++){
+                if(primes[j] * dp[pointers[j]]==min)
+                    pointers[j]++;
+            }
+        }
+      
+        return dp[n];
+    }
+//Method -2
+	public int nthSuperUglyNumber(int n, int[] primes) {
+       int m = primes.length;       
+        int [] dp = new int[n+1];        
+        PriorityQueue<Pair> pq = new PriorityQueue<>();
+        for(int i=0;i<m;i++){
+        pq.add(new Pair(primes[i],1,primes[i]));
+        }
+         for(int i=2;i<=n;){
+            Pair rp = pq.remove();
+            if(rp.value != dp[i-1]){
+                dp[i] = rp.value;
+                i++;
+            }
+            pq.add(new Pair(rp.prime,rp.indx+1,rp.prime * dp[rp.indx + 1]));
+          
+        }
+         return dp[n];
+    }
+    public class Pair implements Comparable<Pair>{
+        int prime;         int indx;         int value;
+        
+        Pair(int prime,int indx, int value){
+            this.prime = prime;
+            this.indx = indx;
+            this.value = value;
+        }
+        @Override
+        public int compareTo(Pair o){
+            return this.value - o.value;
+        }
+    }
+	
 
     // longest common subseq.
     private static int lcs(String str1, String str2) {
