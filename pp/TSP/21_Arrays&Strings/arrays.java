@@ -1563,6 +1563,37 @@ public class arrays {
         return result.toArray(new int[result.size()][2]);
     }
 
+    public int[][] insert2(int[][] intervals, int[] newInterval) {
+        ArrayList<int[]> result = new ArrayList<>();
+       int idx = 0; int n = intervals.length;
+       while(idx<n){
+           if(intervals[idx][0]<newInterval[0]){
+               result.add(intervals[idx]);
+               idx++;
+           }else{
+               break;
+           }
+       }
+       
+        if(result.size()==0 || ( result.get(result.size() - 1)[1] < newInterval[0]) ){
+           result.add(newInterval);
+       }else{
+            int lastInterval[] =  result.get(result.size() - 1);
+            lastInterval[1] = Math.max(lastInterval[1],newInterval[1]);
+        }
+
+        while(idx<n){
+            int lastInterval[] =  result.get(result.size() - 1);
+            if(lastInterval[1]>= intervals[idx][0]){
+                lastInterval[1] = Math.max(lastInterval[1],intervals[idx][1]);
+            }else{
+                result.add(intervals[idx]);
+            }
+            idx++;
+        }
+        return result.toArray(new int[result.size()][2]);
+    }
+
     // leetcode 1007. https://leetcode.com/problems/minimum-domino-rotations-for-equal-row/
     private int setCount(int[] arr1, int[] arr2, int val, int count, int indx) {
         if(count != Integer.MAX_VALUE) {
