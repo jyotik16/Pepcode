@@ -124,6 +124,52 @@ public class dp {
         return ans;
     }
 
+	    static class Pair {
+        int indx;
+        int val;
+        String psf;
+
+        Pair(int i, int l, String psf) {
+            this.indx = i;
+            this.val = l;
+            this.psf = psf;
+        }
+    }
+    //print all longest increasing subsequences dp using bfs
+    public static void printLIS(int[] arr) {
+        int n = arr.length;
+        int[] dp = new int[n];
+        int omax = 0;
+        for (int i = 0; i < n; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (arr[i] > arr[j] && dp[i] < dp[j] + 1) {
+                    dp[i] = dp[j] + 1;
+                }
+            }
+            omax = Math.max(omax, dp[i]);
+        }
+        System.out.println("Length of LIS: " + omax);
+        //BFS to print all LIS
+        ArrayDeque<Pair> queue = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            if (dp[i] == omax) {
+                queue.add(new Pair(i, dp[i], arr[i] + ""));
+            }
+        }
+        while (queue.size() > 0) {
+            Pair remP = queue.removeFirst();
+            if (remP.val == 1) {
+                System.out.println(remP.psf);
+            }
+            for (int j = remP.indx - 1; j >= 0; j--) {
+                if (dp[j] == remP.indx - 1 && arr[remP.indx] > arr[j]) {
+                    queue.add(new Pair(j, dp[j], arr[j] + " -> " + remP.psf));
+                }
+            }
+        }
+    }
+
     // maximum sum increasing subsequence
     private static int maxSumLIS(int[] arr) {
         int[] dp = new int[arr.length];
@@ -378,6 +424,58 @@ public class dp {
         return s.substring(x, y + 1);
     }
 
+	    static class PairJ {
+        int indx;
+        int jump; //dp value
+        int val; //array value
+        String psf;
+
+        PairJ(int indx, int jump, int val, String psf) {
+            this.indx = indx;
+            this.jump = jump;
+            this.val = val;
+            this.psf = psf; // Corrected to use the provided value
+        }
+    }
+
+    public static void printAllminJumps(int[] arr) {
+        int n = arr.length;
+        Integer[] dp = new Integer[n];
+        dp[n - 1] = 0;
+
+        // Fill dp array with minimum jumps required to reach the end
+        for (int i = n - 2; i >= 0; i--) {
+            int minJumps = Integer.MAX_VALUE;
+            int steps = arr[i];
+            for (int j = 1; j <= steps && i + j < n; j++) { // Corrected loop condition
+                if (dp[i + j] != null && dp[i + j] < minJumps) {
+                    minJumps = dp[i + j];
+                }
+            }
+            if (minJumps != Integer.MAX_VALUE) {
+                dp[i] = minJumps + 1;
+            }
+        }
+
+        System.out.println("Min jumps: " + dp[0]);
+
+        // BFS to print all paths
+        ArrayDeque<PairJ> queue = new ArrayDeque<>();
+        queue.add(new PairJ(0, dp[0], arr[0], "0"));
+        while (!queue.isEmpty()) {
+            PairJ remP = queue.removeFirst();
+            if (remP.indx == n - 1) {
+                System.out.println(remP.psf);
+            }
+            for (int j = 1; j <= arr[remP.indx] && remP.indx + j < n; j++) {
+                int ci = remP.indx + j;
+                if (dp[ci] != null && dp[ci] == remP.jump - 1) {
+                    queue.add(new PairJ(ci, dp[ci], arr[ci], remP.psf + " -> " + ci));
+                }
+            }
+        }
+    }
+
     // print path of min jumps
     private static class MJHelper {
         int indx;
@@ -420,6 +518,55 @@ public class dp {
                     int nindx = rem.indx + jump;
                     que.add(new MJHelper(nindx, arr[nindx], rem.minJumps - 1, rem.psf + " -> "+ nindx));
                 }
+            }
+        }
+    }
+
+	    static class PairM{
+        int row;
+        int col;
+        String psf;
+        PairM(int r,int c,String psf){
+            this.row = r;
+            this.col = c;
+            this.psf = psf;
+        }
+    }
+    
+    public static void printAllminCostPath(int [][] mat,int x,int y){
+
+        int [][] dp = new int[mat.length][mat[0].length];
+
+        for(int i=mat.length-1;i>=0;i--){
+            for(int j=mat[0].length-1;j>=0;j--){
+                if(i == mat.length-1 && j == mat[0].length-1){
+                    dp[i][j] = mat[i][j];
+                }
+                else if(i == mat.length-1){
+                    dp[i][j] = mat[i][j] + dp[i][j+1];
+                }else if(j == mat[0].length-1){
+                    dp[i][j] = mat[i][j] + dp[i+1][j];
+                }else{
+                    dp[i][j] = mat[i][j] + Math.min(dp[i+1][j],dp[i][j+1]);
+                }
+            }
+        }
+
+        System.out.println("MinCostPathValue: "+dp[0][0]);
+        ArrayDeque<PairM> queue = new ArrayDeque<>();
+        queue.add(new PairM(0,0,""));
+
+        while(queue.size()>0){
+            PairM rem = queue.removeFirst();
+            int i = rem.row; int j = rem.col;
+            if(i == mat.length-1 && j == mat[0].length-1){
+                System.out.println(rem.psf); continue;
+            }
+            if(i+1< mat.length && (dp[i][j] - mat[i][j]) == dp[i+1][j]){
+                queue.add(new PairM(i+1,j," D "+rem.psf));
+            }
+            if(j+1<mat[0].length && (dp[i][j]-mat[i][j]) == dp[i][j+1]){
+                queue.add(new PairM(i,j+1," H "+rem.psf));
             }
         }
     }
@@ -484,7 +631,9 @@ public class dp {
                 }
             }
         }
-    } 
+    }
+
+	
     
     // print all path in goldmine
     private static int[] xarr = {-1, 0, 1};
