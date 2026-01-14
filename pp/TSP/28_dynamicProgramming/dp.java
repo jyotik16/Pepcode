@@ -522,55 +522,6 @@ public class dp {
         }
     }
 
-	    static class PairM{
-        int row;
-        int col;
-        String psf;
-        PairM(int r,int c,String psf){
-            this.row = r;
-            this.col = c;
-            this.psf = psf;
-        }
-    }
-    
-    public static void printAllminCostPath(int [][] mat,int x,int y){
-
-        int [][] dp = new int[mat.length][mat[0].length];
-
-        for(int i=mat.length-1;i>=0;i--){
-            for(int j=mat[0].length-1;j>=0;j--){
-                if(i == mat.length-1 && j == mat[0].length-1){
-                    dp[i][j] = mat[i][j];
-                }
-                else if(i == mat.length-1){
-                    dp[i][j] = mat[i][j] + dp[i][j+1];
-                }else if(j == mat[0].length-1){
-                    dp[i][j] = mat[i][j] + dp[i+1][j];
-                }else{
-                    dp[i][j] = mat[i][j] + Math.min(dp[i+1][j],dp[i][j+1]);
-                }
-            }
-        }
-
-        System.out.println("MinCostPathValue: "+dp[0][0]);
-        ArrayDeque<PairM> queue = new ArrayDeque<>();
-        queue.add(new PairM(0,0,""));
-
-        while(queue.size()>0){
-            PairM rem = queue.removeFirst();
-            int i = rem.row; int j = rem.col;
-            if(i == mat.length-1 && j == mat[0].length-1){
-                System.out.println(rem.psf); continue;
-            }
-            if(i+1< mat.length && (dp[i][j] - mat[i][j]) == dp[i+1][j]){
-                queue.add(new PairM(i+1,j," D "+rem.psf));
-            }
-            if(j+1<mat[0].length && (dp[i][j]-mat[i][j]) == dp[i][j+1]){
-                queue.add(new PairM(i,j+1," H "+rem.psf));
-            }
-        }
-    }
-
     // print all path for minimum cost in grid
     private static class Pair {
         String psf;
