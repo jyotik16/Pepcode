@@ -1300,6 +1300,42 @@ public class arrays {
         }
         return omax;
     }
+    public int minMeetingRooms2(int[][] intervals) {
+        // Base case: If there are no meetings, 0 rooms are needed.
+        if (intervals == null || intervals.length == 0) {
+            return 0;
+        }
+
+        // Step 1: Sort the intervals by start time.
+        // If start times are the same, order doesn't strictly matter for correctness,
+        // but sorting by start time is crucial.
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+        // Step 2: Initialize a Min-Heap (PriorityQueue) to store end times.
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        // Add the end time of the first meeting to start.
+        pq.add(intervals[0][1]);
+
+        // Step 3: Iterate through the rest of the meetings.
+        for (int i = 1; i < intervals.length; i++) {
+
+            // Check if the earliest ending meeting (top of heap) is finished
+            // by the time the current meeting starts.
+            if (intervals[i][0] >= pq.peek()) {
+                // If yes, that room is free. Remove it from the heap to reuse it.
+                pq.poll();
+            }
+
+            // Add the current meeting's end time to the heap.
+            // If we polled above, this effectively updates the end time of that room.
+            // If we didn't poll, this allocates a new room.
+            pq.add(intervals[i][1]);
+        }
+
+        // The size of the priority queue represents the number of active rooms needed.
+        return pq.size();
+    }
 
     // leetcode 239. https://leetcode.com/problems/sliding-window-maximum/
     private int[] nextGreaterRight(int[] arr) {
@@ -1370,6 +1406,40 @@ public class arrays {
             } else {
                 res[i] = 0;
             }
+        }
+        return res;
+    }
+
+        //First negative integer in every window of size k
+    //A Deque allows adding and removing elements from both ends in constant time (O(1)).
+    public static long[] firstNegativeInteger(long[] arr, int n, int k) {
+        ArrayList<Long> result = new ArrayList<>();
+        Deque<Integer> dq = new LinkedList<>();
+        int i = 0; int j = 0;
+        while(j < n) {
+            if(arr[j] < 0) {
+                dq.addLast(j);
+            }
+            if(j - i + 1 < k) {
+                j++;
+            } else if(j - i + 1 == k) {
+                // window size reached
+                if(dq.size() == 0) {
+                    result.add(0L);
+                } else {
+                    result.add(arr[dq.peekFirst()]);
+                    // remove the element going out of the window
+                    if(dq.peekFirst() == i) {
+                        dq.removeFirst();
+                    }
+                }
+                i++;
+                j++;
+            }
+        }
+        long res[] = new long[result.size()];
+        for(int idx = 0; idx < result.size(); idx++) {
+            res[idx] = result.get(idx);
         }
         return res;
     }
