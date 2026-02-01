@@ -287,6 +287,14 @@ public class gtree {
         }
     }
 
+    // 2
+    public static void mirror2(Node node){
+        for(Node child : node.children) {
+            mirror(child);
+        }
+        Collections.reverseOrder();
+    }
+
     public static void removeLeaves(Node node) {
         // preorder -> removal of leaves
 
