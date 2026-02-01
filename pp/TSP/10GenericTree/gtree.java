@@ -292,7 +292,7 @@ public class gtree {
         for(Node child : node.children) {
             mirror(child);
         }
-        Collections.reverseOrder();
+        Collections.reverse(node.childern);
     }
 
     public static void removeLeaves(Node node) {
